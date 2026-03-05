@@ -5,6 +5,7 @@ import { FaSearch, FaTimes } from 'react-icons/fa';
 import { BiMoviePlay, BiTv } from 'react-icons/bi';
 import ContentCard from './ContentCard';
 import { GENRES, SPECIAL_CATEGORIES } from './tmdb';
+import SEO from './SEO';
 
 const CONFIG = {
   API_KEY: import.meta.env.VITE_TMDB_API,
@@ -166,6 +167,14 @@ function SearchPage() {
 
   return (
     <div className="min-h-screen bg-black text-white px-4 sm:px-8 pt-6 sm:pt-10 pb-16">
+      <SEO
+        title={debouncedQuery ? `"${debouncedQuery}" — Search Results` : 'Search Movies & TV Shows'}
+        description={
+          debouncedQuery
+            ? `Search results for "${debouncedQuery}" on WeFlix. Find movies, TV shows, and series to stream for free.`
+            : 'Search for movies, TV shows, and series on WeFlix. Find your favorites or discover something new to stream for free.'
+        }
+      />
       <h1 className="text-3xl font-bold mb-6">Search</h1>
 
       {/* Search bar */}

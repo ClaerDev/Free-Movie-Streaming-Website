@@ -4,7 +4,7 @@ A modern movie and TV show streaming discovery app built with **React 18**, **Vi
 
 ## Preview
 
-![WeFlix Preview](preview.png)
+![WeFlix Preview](public/preview.png)
 
 ---
 

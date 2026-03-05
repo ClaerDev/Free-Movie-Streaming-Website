@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { toDetailPath } from './urlUtils';
 import HeroBanner from './HeroBanner';
 import TrendingRow from './TrendingRow';
+import SEO from './SEO';
 
 const SectionDivider = ({ label }) => (
   <div className="flex items-center gap-4 px-4 sm:px-6 mb-8 mt-4">
@@ -24,6 +25,11 @@ export default function HomePage() {
 
   return (
     <div className="bg-[#0a0c12] min-h-screen">
+      <SEO
+        title="WeFlix — Stream Movies & TV Shows"
+        description="Watch trending movies and TV shows for free. Browse by genre, discover new releases, and stream instantly on WeFlix — powered by TMDB."
+        noSuffix
+      />
       <HeroBanner />
 
       <div className="pt-10 pb-8">

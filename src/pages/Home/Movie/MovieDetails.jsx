@@ -6,6 +6,7 @@ import { FaRedo, FaStar, FaArrowLeft, FaFilm } from "react-icons/fa";
 import { BiCalendar, BiTime, BiGlobe } from "react-icons/bi";
 import Loadingspinner from "../resused/Loadingspinner";
 import VideoPlayer from "./VideoPlayer";
+import SEO from "../SEO";
 
 const MemoizedVideoPlayer = memo(VideoPlayer);
 
@@ -110,6 +111,39 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
 
   return (
     <div className="min-h-screen bg-[#0a0c12] text-white">
+      <SEO
+        title={`${movie.title}${year ? ` (${year})` : ''} — Watch Free on WeFlix`}
+        description={
+          movie.overview
+            ? `${movie.overview.slice(0, 150).trim()}… Watch ${movie.title} free on WeFlix.`
+            : `Watch ${movie.title} free on WeFlix.`
+        }
+        image={
+          movie.backdrop_path
+            ? `https://image.tmdb.org/t/p/w1280${movie.backdrop_path}`
+            : movie.poster_path
+            ? `https://image.tmdb.org/t/p/w780${movie.poster_path}`
+            : undefined
+        }
+        type="video.movie"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'Movie',
+          name: movie.title,
+          description: movie.overview,
+          image: movie.poster_path ? `https://image.tmdb.org/t/p/w780${movie.poster_path}` : undefined,
+          dateCreated: movie.release_date,
+          ...(movie.vote_average > 0 && {
+            aggregateRating: {
+              '@type': 'AggregateRating',
+              ratingValue: movie.vote_average.toFixed(1),
+              bestRating: 10,
+              ratingCount: movie.vote_count,
+            },
+          }),
+          genre: (movie.genres ?? []).map(g => g.name),
+        }}
+      />
 
       {/* ══════ BACK BUTTON ══════ */}
       <div className="px-4 pt-5 md:px-12">

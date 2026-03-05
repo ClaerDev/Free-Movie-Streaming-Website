@@ -3,6 +3,7 @@ import { toDetailPath } from '../urlUtils';
 import ContentGrid from '../ContentGrid';
 import { GENRES, SPECIAL_CATEGORIES } from '../tmdb';
 import { BiTv, BiSortAlt2 } from 'react-icons/bi';
+import SEO from '../SEO';
 
 const SORT_OPTIONS = [
   { value: 'popularity.desc',    label: 'Most Popular' },
@@ -40,7 +41,15 @@ function Series() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Page header */}
+      <SEO
+        title={genre ? `${genre.name} TV Shows` : 'TV Shows'}
+        description={
+          genre
+            ? `Stream ${genre.name} TV shows free on WeFlix. Watch the best ${genre.name.toLowerCase()} series, from binge-worthy dramas to must-watch hits.`
+            : 'Stream trending TV shows and series free on WeFlix. Discover the most popular, top-rated, and newest shows across all genres.'
+        }
+      />
+      {/* Page header */}}
       <div className="px-4 sm:px-6 pt-6 pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

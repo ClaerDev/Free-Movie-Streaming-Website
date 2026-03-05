@@ -3,6 +3,7 @@ import { toDetailPath } from '../urlUtils';
 import ContentGrid from '../ContentGrid';
 import { GENRES, SPECIAL_CATEGORIES } from '../tmdb';
 import { BiMoviePlay, BiSortAlt2 } from 'react-icons/bi';
+import SEO from '../SEO';
 
 const SORT_OPTIONS = [
   { value: 'popularity.desc',          label: 'Most Popular' },
@@ -41,6 +42,14 @@ function Movie() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <SEO
+        title={genre ? `${genre.name} Movies` : 'Movies'}
+        description={
+          genre
+            ? `Browse and stream ${genre.name} movies free on WeFlix. Discover the best ${genre.name.toLowerCase()} films, from classics to new releases.`
+            : 'Browse and stream trending movies free on WeFlix. Discover the most popular, top-rated, and newest films across all genres.'
+        }
+      />
       {/* Page header */}
       <div className="px-4 sm:px-6 pt-6 pb-3">
         <div className="flex items-center justify-between">

@@ -12,6 +12,7 @@ import { FaRedo, FaStar, FaArrowLeft, FaTv } from "react-icons/fa";
 import { BiCalendar, BiGlobe, BiTv } from "react-icons/bi";
 import Loadingspinner from "../resused/Loadingspinner";
 import VideoPlayer from "./VideoPlayer";
+import SEO from "../SEO";
 
 const MemoizedVideoPlayer = memo(VideoPlayer);
 
@@ -135,8 +136,40 @@ const TvDetails = ({ tvId: tvIdProp }) => {
   const currentSeasonData = allSeasons.find(s => s.season_number === viewingSeason);
 
   return (
-    <div className="min-h-screen bg-[#0a0c12] text-white">
-
+    <div className="min-h-screen bg-[#0a0c12] text-white">      <SEO
+        title={`${tv.name}${year ? ` (${year})` : ''} — Watch Free on WeFlix`}
+        description={
+          tv.overview
+            ? `${tv.overview.slice(0, 150).trim()}… Stream ${tv.name} free on WeFlix.`
+            : `Stream ${tv.name} free on WeFlix.`
+        }
+        image={
+          tv.backdrop_path
+            ? `https://image.tmdb.org/t/p/w1280${tv.backdrop_path}`
+            : tv.poster_path
+            ? `https://image.tmdb.org/t/p/w780${tv.poster_path}`
+            : undefined
+        }
+        type="video.episode"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'TVSeries',
+          name: tv.name,
+          description: tv.overview,
+          image: tv.poster_path ? `https://image.tmdb.org/t/p/w780${tv.poster_path}` : undefined,
+          startDate: tv.first_air_date,
+          numberOfSeasons: allSeasons.length || undefined,
+          ...(tv.vote_average > 0 && {
+            aggregateRating: {
+              '@type': 'AggregateRating',
+              ratingValue: tv.vote_average.toFixed(1),
+              bestRating: 10,
+              ratingCount: tv.vote_count,
+            },
+          }),
+          genre: (tv.genres ?? []).map(g => g.name),
+        }}
+      />
       {/* ── Back button ───────────────────────────── */}
       <div className="px-4 pt-5 md:px-12">
         <button
