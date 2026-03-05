@@ -6,7 +6,7 @@ import Sidebar from './Sidebar';
 function ParentComponent() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [scrollPosition, setScrollPosition] = useState(0);
 
   const handleScroll = useCallback(() => setScrollPosition(window.scrollY), []);
@@ -36,7 +36,11 @@ function ParentComponent() {
   };
 
   const handleGenreSelect = (genreId) => {
-    setSearchParams({ genre: genreId, sort: 'popularity.desc' });
+    const basePath = activePage === 'series' ? '/series' : '/movies';
+    navigate({
+      pathname: basePath,
+      search: `?genre=${genreId}&sort=popularity.desc`,
+    });
   };
 
   return (
