@@ -58,7 +58,7 @@ export const SPECIAL_CATEGORIES = {
   movie: [
     { id: -1, name: 'Anime' },
     { id: -2, name: 'Thai Movie' },
-    { id: -3, name: '18+ Movies' },
+    { id: -3, name: '+ Movies' },
   ],
   tv: [
     { id: -1, name: 'Anime' },
@@ -66,7 +66,6 @@ export const SPECIAL_CATEGORIES = {
     { id: -3, name: 'C-Drama' },
     { id: -4, name: 'Donghua' },
     { id: -5, name: 'Thai Drama' },
-    { id: -6, name: '18+ TV Shows' },
   ],
 };
 
@@ -75,10 +74,8 @@ export const SPECIAL_PARAMS = {
   '-1_movie': { with_genres: '16', with_keywords: '210024' },          // Anime movies
   '-1_tv':    { with_genres: '16', with_keywords: '210024' },          // Anime TV
   '-2_movie': { with_origin_country: 'TH' },                           // Thai Movie
-  '-3_movie': { include_adult: 'true', with_origin_country: 'JP,KR', sort_by: 'popularity.desc' },   // Adult Movie
   '-2_tv':    { with_origin_country: 'KR', with_genres: '18' },       // K-Drama
   '-3_tv':    { with_origin_country: 'CN', with_genres: '18' },       // C-Drama
   '-4_tv':    { with_origin_country: 'CN', with_genres: '16' },       // Donghua
   '-5_tv':    { with_origin_country: 'TH', with_genres: '18' },       // Thai Drama
-  '-6_tv':    { include_adult: 'true', sort_by: 'popularity.desc' },   // Adult TV
 };
