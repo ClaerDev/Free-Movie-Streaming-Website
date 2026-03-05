@@ -1,41 +1,79 @@
-import { useState } from 'react';
-import GenreList from '../Genrelist';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { toDetailPath } from '../urlUtils';
 import ContentGrid from '../ContentGrid';
-import { useSeries } from '../SeriesContext';
+import { GENRES, SPECIAL_CATEGORIES } from '../tmdb';
+import { BiTv, BiSortAlt2 } from 'react-icons/bi';
+
+const SORT_OPTIONS = [
+  { value: 'popularity.desc',    label: 'Most Popular' },
+  { value: 'vote_average.desc',   label: 'Top Rated' },
+  { value: 'first_air_date.desc', label: 'Newest' },
+  { value: 'first_air_date.asc',  label: 'Oldest' },
+];
 
 function Series() {
-  const [selectedGenreId, setSelectedGenreId] = useState(9648);
-  const { selectSeries } = useSeries();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const genreId = searchParams.get('genre') ? Number(searchParams.get('genre')) : null;
+  const sortBy  = searchParams.get('sort') || 'popularity.desc';
 
-  const handleGenreSelect = (genreId) => {
-    setSelectedGenreId(genreId);
-  };
+  const genre =
+    GENRES.tv.find(g => g.id === genreId) ||
+    SPECIAL_CATEGORIES.tv.find(g => g.id === genreId);
 
-  const handleSelect = (item) => {
-    selectSeries(item); // Updates global SeriesContext
+  const handleSelect = (item) => navigate(toDetailPath('tv', item.id, item.title || item.name));
+
+  const handleSort = (value) => {
+    setSearchParams({ genre: genreId, sort: value });
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-black">
-      <div className="w-full shadow-lg mb-5">
-        <div className="container mx-auto px-4">
-          <div className="overflow-x-auto pb-2 scrollbar-hide">
-            <GenreList
-              type="tv"
-              onGenreSelect={handleGenreSelect}
-              selectedGenreId={selectedGenreId}
-            />
+    <div className="flex flex-col min-h-screen">
+      {/* Page header */}
+      <div className="px-6 pt-8 pb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-red-600/20 flex items-center justify-center">
+              <BiTv className="text-red-400 text-lg" />
+            </div>
+            <div>
+              <h1 className="text-white text-2xl font-black tracking-tight">TV Shows</h1>
+              {genre ? (
+                <p className="text-gray-500 text-sm">
+                  Browsing <span className="text-red-400 font-semibold">{genre.name}</span>
+                </p>
+              ) : (
+                <p className="text-gray-500 text-sm">
+                  <span className="text-red-400 font-semibold">Trending</span> this week
+                </p>
+              )}
+            </div>
           </div>
+          {/* Sort selector — hidden on trending (no genre selected) */}
+          {genreId && (
+            <div className="flex items-center gap-2">
+              <BiSortAlt2 className="text-gray-500 text-lg shrink-0" />
+              <select
+                value={sortBy}
+                onChange={e => handleSort(e.target.value)}
+                className="bg-white/[0.07] border border-white/10 text-sm text-gray-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-red-500 cursor-pointer"
+              >
+                {SORT_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value} className="bg-[#0b0f18]">{opt.label}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
       </div>
-      <main className="flex-grow pt-6">
-        <div className="container mx-auto px-4">
-          <ContentGrid
-            genreId={selectedGenreId}
-            type="tv"
-            onSelect={handleSelect}
-          />
-        </div>
+
+      <main className="flex-grow">
+        <ContentGrid
+          genreId={genreId}
+          type="tv"
+          onSelect={handleSelect}
+          sortBy={sortBy}
+        />
       </main>
     </div>
   );

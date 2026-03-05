@@ -1,27 +1,21 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
 import ContentCard from './ContentCard';
-import { fetchContentByGenre } from './Fetcher';
+import { fetchContentByGenre, fetchTrending } from './Fetcher';
+import { SPECIAL_PARAMS } from './tmdb';
 import { BiWifi } from 'react-icons/bi';
 
 const POSTER_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 const MAX_PAGES = 500;
 
 const ErrorWarning = () => (
-  <div className="flex flex-col items-center justify-center space-y-2 p-4  max-w-xs mx-auto">
-    <div className="relative">
-      
-      <BiWifi className="text-red-400 w-6 h-10 absolute -top-1 mb-5 -right-1 animate-bounce" />
-    </div>
-    <div className="text-center space-y-1">
-      <h3 className="text-red-700 mt-6 text-md font-bold">Connection Error</h3>
-      
-    </div>
-    
+  <div className="flex flex-col items-center justify-center gap-3 py-16">
+    <BiWifi className="text-red-400 w-10 h-10" />
+    <p className="text-gray-400 text-sm font-medium">Connection error — check your network</p>
   </div>
 );
 
-const ContentGrid = ({ genreId, type, onSelect }) => {
+const ContentGrid = ({ genreId, type, onSelect, sortBy = 'popularity.desc' }) => {
   const [state, setState] = useState({
     content: [],
     loading: false,
@@ -40,8 +34,35 @@ const ContentGrid = ({ genreId, type, onSelect }) => {
     loadingRef.current = true;
     setState((prev) => ({ ...prev, loading: true }));
 
+    // If no genreId, fetch trending instead
+    if (genreId == null) {
+      try {
+        const newContent = await fetchTrending(type, state.page);
+        const uniqueContent = newContent.filter((item) => {
+          if (state.uniqueIds.has(item.id)) return false;
+          state.uniqueIds.add(item.id);
+          return true;
+        });
+        setState((prev) => ({
+          ...prev,
+          content: [...prev.content, ...uniqueContent],
+          hasMore: uniqueContent.length > 0 && prev.page < MAX_PAGES,
+          loading: false,
+          error: null,
+        }));
+      } catch (error) {
+        setState((prev) => ({ ...prev, error: error.message, loading: false }));
+      } finally {
+        loadingRef.current = false;
+      }
+      return;
+    }
+
+    // Resolve special-category override params (negative genreId = special)
+    const overrideParams = genreId < 0 ? (SPECIAL_PARAMS[`${genreId}_${type}`] ?? null) : null;
+
     try {
-      const newContent = await fetchContentByGenre(type, genreId, state.page);
+      const newContent = await fetchContentByGenre(type, genreId, state.page, overrideParams, sortBy);
       const uniqueContent = newContent.filter((item) => {
         if (state.uniqueIds.has(item.id)) return false;
         state.uniqueIds.add(item.id);
@@ -64,7 +85,7 @@ const ContentGrid = ({ genreId, type, onSelect }) => {
     } finally {
       loadingRef.current = false;
     }
-  }, [genreId, type, state.page, state.uniqueIds]);
+  }, [genreId, type, state.page, state.uniqueIds, sortBy]);
 
   const handleObserver = useCallback(
     (entries) => {
@@ -88,7 +109,7 @@ const ContentGrid = ({ genreId, type, onSelect }) => {
       hasMore: true,
       uniqueIds: new Set(),
     });
-  }, [genreId, type]);
+  }, [genreId, type, sortBy]);
 
   useEffect(() => {
     loadContent();
@@ -118,21 +139,11 @@ const ContentGrid = ({ genreId, type, onSelect }) => {
   }, [state.content]);
 
   const generatePlaceholder = () => (
-    <div className="flex flex-col w-full items-center justify-center h-full min-h-[200px] bg-gray-200 animate-pulse rounded-lg">
-      <div className="h-3/4 w-2/3 bg-gray-300 rounded-md" />
-      <div className="h-6 w-2/3 mt-2 bg-gray-300 rounded" />
-    </div>
+    <div className="w-full aspect-[2/3] rounded-xl bg-white/5 animate-pulse" />
   );
 
-  const getItemsPerRow = () => {
-    if (window.innerWidth >= 1280) return 6; // xl
-    if (window.innerWidth >= 1024) return 5; // lg
-    if (window.innerWidth >= 768) return 4;  // md
-    return 3;                                
-  };
-
   const renderContent = () => {
-    const items = state.content.map((item, index) => {
+    return state.content.map((item, index) => {
       const isLastElement = index === state.content.length - 1;
       const posterPath = item.poster_path
         ? `${POSTER_BASE_URL}${item.poster_path}`
@@ -142,7 +153,6 @@ const ContentGrid = ({ genreId, type, onSelect }) => {
         <div
           key={item.id}
           ref={isLastElement ? lastElementRef : null}
-          className="aspect-[2/3] min-h-[200px] w-full mb-28 transform transition-transform duration-300 hover:scale-105"
         >
           <ContentCard
             title={item.title || item.name}
@@ -150,47 +160,44 @@ const ContentGrid = ({ genreId, type, onSelect }) => {
             rating={item.vote_average}
             onClick={() => onSelect(item)}
             releaseDate={item.release_date || item.first_air_date}
-            aria-label={`Select ${item.title || item.name}`}
           />
         </div>
       );
     });
-
-    const itemsPerRow = getItemsPerRow();
-    const missingItems = itemsPerRow - (items.length % itemsPerRow);
-
-    if (missingItems < itemsPerRow) {
-      for (let i = 0; i < missingItems; i++) {
-        items.push(
-          <div key={`placeholder-${i}`} className="aspect-[2/3] min-h-[200px] w-full mb-4">
-            {generatePlaceholder()}
-          </div>
-        );
-      }
-    }
-
-    return items;
   };
 
   return (
-    <div className=" px-2 sm:px-4 py-6">
-      <div className="grid w-full grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-4">
-        {renderContent()}
-      </div>
-      {state.loading && (
-        <div className="flex items-center justify-center py-6">
-          <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-4 border-purple-500 border-t-transparent shadow-lg" />
+    <div className="px-2 sm:px-4 py-4">
+      {/* Initial loading skeleton */}
+      {state.content.length === 0 && state.loading && (
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3 sm:gap-4">
+          {Array.from({ length: 21 }).map((_, i) => (
+            <div key={i} className="w-full aspect-[2/3] rounded-xl bg-white/5 animate-pulse" />
+          ))}
         </div>
       )}
-      {state.error && <ErrorWarning onRetry={loadContent} errorMessage={state.error} />}
+
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3 sm:gap-4">
+        {renderContent()}
+      </div>
+
+      {/* Infinite-scroll spinner */}
+      {state.content.length > 0 && state.loading && (
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-9 w-9 border-[3px] border-red-600 border-t-transparent" />
+        </div>
+      )}
+
+      {state.error && <ErrorWarning />}
     </div>
   );
 };
 
 ContentGrid.propTypes = {
-  genreId: PropTypes.number.isRequired,
+  genreId: PropTypes.number,
   type: PropTypes.oneOf(['movie', 'tv']).isRequired,
   onSelect: PropTypes.func.isRequired,
+  sortBy: PropTypes.string,
 };
 
 export default ContentGrid;

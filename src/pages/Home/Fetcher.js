@@ -2,17 +2,26 @@ const API_KEY = import.meta.env.VITE_TMDB_API;
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 /**
- * Fetch content by genre
+ * Fetch content by genre — or by custom override params for special categories
  */
-export const fetchContentByGenre = async (type, genreId, page = 1) => {
+export const fetchContentByGenre = async (type, genreId, page = 1, overrideParams = null, sortBy = 'popularity.desc') => {
   try {
-    const validPage = Math.min(Math.max(1, Math.floor(page)), 500);  // Ensures page is between 1 and 500
+    const validPage = Math.min(Math.max(1, Math.floor(page)), 500);
 
     const url = new URL(`${BASE_URL}/discover/${type}`);
     url.searchParams.append('api_key', API_KEY);
-    url.searchParams.append('with_genres', genreId);
     url.searchParams.append('page', validPage);
-    url.searchParams.append('language', 'en-US');
+    url.searchParams.append('sort_by', sortBy);
+    // Require minimum votes when sorting by rating to avoid low-vote noise
+    if (sortBy.startsWith('vote_average')) {
+      url.searchParams.append('vote_count.gte', '150');
+    }
+
+    if (overrideParams) {
+      Object.entries(overrideParams).forEach(([k, v]) => url.searchParams.append(k, v));
+    } else if (genreId) {
+      url.searchParams.append('with_genres', genreId);
+    }
 
     const response = await fetch(url);
 
@@ -24,10 +33,32 @@ export const fetchContentByGenre = async (type, genreId, page = 1) => {
     const data = await response.json();
     return data.results;
   } catch (error) {
-    const formattedType = typeof type === 'string' && type.length > 0 
-      ? type.charAt(0).toUpperCase() + type.slice(1) 
-      : "Content";
+    const formattedType = typeof type === 'string' && type.length > 0
+      ? type.charAt(0).toUpperCase() + type.slice(1)
+      : 'Content';
     throw new Error(`${formattedType} fetch failed: ${error.message}`);
+  }
+};
+
+/**
+ * Fetch trending content (movie or tv) for a given time window
+ */
+export const fetchTrending = async (type, page = 1, timeWindow = 'week') => {
+  try {
+    const validPage = Math.min(Math.max(1, Math.floor(page)), 500);
+    const url = new URL(`${BASE_URL}/trending/${type}/${timeWindow}`);
+    url.searchParams.append('api_key', API_KEY);
+    url.searchParams.append('page', validPage);
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.status_message || `Failed to fetch trending ${type}`);
+    }
+    const data = await response.json();
+    return data.results;
+  } catch (error) {
+    throw new Error(`Trending fetch failed: ${error.message}`);
   }
 };
 

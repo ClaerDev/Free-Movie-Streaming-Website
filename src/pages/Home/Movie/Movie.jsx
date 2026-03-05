@@ -1,41 +1,80 @@
-import { useState } from 'react';
-import GenreList from '../Genrelist';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { toDetailPath } from '../urlUtils';
 import ContentGrid from '../ContentGrid';
-import { useMovie } from '../MoviesContext';
+import { GENRES, SPECIAL_CATEGORIES } from '../tmdb';
+import { BiMoviePlay, BiSortAlt2 } from 'react-icons/bi';
+
+const SORT_OPTIONS = [
+  { value: 'popularity.desc',          label: 'Most Popular' },
+  { value: 'vote_average.desc',         label: 'Top Rated' },
+  { value: 'primary_release_date.desc', label: 'Newest' },
+  { value: 'primary_release_date.asc',  label: 'Oldest' },
+  { value: 'revenue.desc',              label: 'Highest Grossing' },
+];
 
 function Movie() {
-  const [selectedGenreId, setSelectedGenreId] = useState(28);
-  const { selectMovie } = useMovie();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const genreId = searchParams.get('genre') ? Number(searchParams.get('genre')) : null;
+  const sortBy  = searchParams.get('sort') || 'popularity.desc';
 
-  const handleGenreSelect = (genreId) => {
-    setSelectedGenreId(genreId);
-  };
+  const genre =
+    GENRES.movie.find(g => g.id === genreId) ||
+    SPECIAL_CATEGORIES.movie.find(g => g.id === genreId);
 
-  const handleSelect = (item) => {
-    selectMovie(item); // Updates global MovieContext
+  const handleSelect = (item) => navigate(toDetailPath('movie', item.id, item.title || item.name));
+
+  const handleSort = (value) => {
+    setSearchParams({ genre: genreId, sort: value });
   };
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="w-full shadow-lg mb-5">
-        <div className="container mx-auto px-4">
-          <div className="overflow-x-auto pb-4 scrollbar-hide">
-            <GenreList
-              type="movie"
-              onGenreSelect={handleGenreSelect}
-              selectedGenreId={selectedGenreId}
-            />
+      {/* Page header */}
+      <div className="px-6 pt-8 pb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-red-600/20 flex items-center justify-center">
+              <BiMoviePlay className="text-red-400 text-lg" />
+            </div>
+            <div>
+              <h1 className="text-white text-2xl font-black tracking-tight">Movies</h1>
+              {genre ? (
+                <p className="text-gray-500 text-sm">
+                  Browsing <span className="text-red-400 font-semibold">{genre.name}</span>
+                </p>
+              ) : (
+                <p className="text-gray-500 text-sm">
+                  <span className="text-red-400 font-semibold">Trending</span> this week
+                </p>
+              )}
+            </div>
           </div>
+          {/* Sort selector — hidden on trending (no genre selected) */}
+          {genreId && (
+            <div className="flex items-center gap-2">
+              <BiSortAlt2 className="text-gray-500 text-lg shrink-0" />
+              <select
+                value={sortBy}
+                onChange={e => handleSort(e.target.value)}
+                className="bg-white/[0.07] border border-white/10 text-sm text-gray-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-red-500 cursor-pointer"
+              >
+                {SORT_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value} className="bg-[#0b0f18]">{opt.label}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
       </div>
-      <main className="flex-grow pt-2">
-        <div className="container mx-auto px-4">
-          <ContentGrid
-            genreId={selectedGenreId}
-            type="movie"
-            onSelect={handleSelect}
-          />
-        </div>
+
+      <main className="flex-grow">
+        <ContentGrid
+          genreId={genreId}
+          type="movie"
+          onSelect={handleSelect}
+          sortBy={sortBy}
+        />
       </main>
     </div>
   );

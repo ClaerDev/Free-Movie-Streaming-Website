@@ -1,35 +1,7 @@
 import React, { useState, memo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
-import { FaPlay } from 'react-icons/fa';
-
-const RatingCircle = ({ rating }) => {
-  const percentage = (rating / 10) * 100;
-
-  return (
-    <div className="relative w-8 h-8 bg-black backdrop-blur-sm rounded-full flex items-center justify-center">
-      <svg viewBox="0 0 36 36" className="absolute w-full h-full -rotate-90">
-        <path
-          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-          fill="none"
-          stroke="#444"
-          strokeWidth="3"
-        />
-        <path
-          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-          fill="none"
-          stroke={rating >= 7 ? '#22c55e' : rating >= 5 ? '#eab308' : '#ef4444'}
-          strokeWidth="3"
-          strokeDasharray={`${percentage}, 100`}
-          className="transition-all duration-700 ease-out"
-        />
-      </svg>
-      <span className="text-white text-xs font-bold z-10">
-        {rating ? `${Math.round(rating * 10)}%` : 'N/A'}
-      </span>
-    </div>
-  );
-};
+import { FaPlay, FaStar } from 'react-icons/fa';
 
 const ContentCard = memo(({
   title,
@@ -40,18 +12,8 @@ const ContentCard = memo(({
   placeholderImage = '/assets/images/placeholder.jpg',
   releaseDate,
 }) => {
-  const [imageState, setImageState] = useState({
-    isLoading: true,
-    hasError: false,
-  });
-
-  const handleImageState = useCallback((type) => {
-    setImageState((prev) => ({
-      ...prev,
-      isLoading: type === 'loading',
-      hasError: type === 'error',
-    }));
-  }, []);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   const handleKeyPress = useCallback((e) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -60,73 +22,76 @@ const ContentCard = memo(({
     }
   }, [onClick]);
 
-  const imageSrc = imageState.hasError ? placeholderImage : poster;
-  const currentDate = new Date();
-  const isReleased = releaseDate ? new Date(releaseDate) <= currentDate : true;
+  const src = imageError ? placeholderImage : poster;
+  const year = releaseDate ? new Date(releaseDate).getFullYear() : null;
+  const ratingNum = rating ? Math.round(rating * 10) : null;
+  const ratingColor = rating >= 7 ? 'text-green-400' : rating >= 5 ? 'text-yellow-400' : 'text-red-400';
 
   return (
     <motion.div
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      className={`group relative w-full overflow-hidden rounded-lg shadow-lg cursor-pointer
-         transition-transform  mr-4 ml-4  duration-300 ${className}`}
+      whileHover={{ scale: 1.04, y: -4 }}
+      whileTap={{ scale: 0.97 }}
+      transition={{ duration: 0.2, ease: 'easeOut' }}
+      className={`group relative w-full cursor-pointer rounded-xl overflow-hidden shadow-lg
+        ring-1 ring-white/5 hover:ring-white/20 hover:shadow-2xl hover:shadow-black/60
+        transition-shadow duration-200 ${className}`}
       onClick={onClick}
       role="button"
       tabIndex={0}
       onKeyPress={handleKeyPress}
-      aria-label={`${title} - Rating: ${rating || 'N/A'}`}
+      aria-label={`${title}${year ? ` (${year})` : ''}`}
     >
-      <div className="relative w-full aspect-[2/3]">
-        {imageState.isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-slate-800/90">
-            <div className="animate-pulse rounded-lg w-full h-full bg-gray-700/50" />
-          </div>
+      {/* Poster */}
+      <div className="relative w-full aspect-[2/3] bg-[#111827]">
+        {/* Skeleton */}
+        {!imageLoaded && !imageError && (
+          <div className="absolute inset-0 animate-pulse bg-gradient-to-b from-white/5 to-white/[0.02]" />
         )}
+
         <img
-          src={imageSrc}
-          alt={`${title} poster`}
-          className={`w-full h-full object-cover transition-all duration-500 ${
-            imageState.isLoading ? 'opacity-0 scale-105' : 'opacity-100 scale-100'
+          src={src}
+          alt={title}
+          className={`w-full h-full object-cover transition-opacity duration-400 ${
+            imageLoaded ? 'opacity-100' : 'opacity-0'
           }`}
-          onLoad={() => handleImageState('loaded')}
-          onError={() => handleImageState('error')}
+          onLoad={() => setImageLoaded(true)}
+          onError={() => { setImageError(true); setImageLoaded(true); }}
         />
-        {!isReleased && (
-          <div className="absolute top-2 left-2 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded">
-            Coming Soon
+
+        {/* Always-visible bottom gradient + title */}
+        <div className="absolute bottom-0 inset-x-0 h-1/2 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
+
+        {/* Rating badge — top right */}
+        {ratingNum && (
+          <div className="absolute top-2 right-2 flex items-center gap-1 bg-black/70 backdrop-blur-sm
+            text-[11px] font-bold px-1.5 py-0.5 rounded-md">
+            <FaStar className={`text-[9px] ${ratingColor}`} />
+            <span className={ratingColor}>{ratingNum}%</span>
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent
-          opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <FaPlay className="text-white text-2xl transform group-hover:scale-110 transition-transform duration-300" />
+
+        {/* Hover overlay */}
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200
+          flex items-center justify-center">
+          <div className="w-11 h-11 rounded-full bg-white/20 backdrop-blur-sm border border-white/30
+            flex items-center justify-center transform scale-90 group-hover:scale-100 transition-transform duration-200">
+            <FaPlay className="text-white text-sm ml-0.5" />
           </div>
-        </div>
-        <div className="absolute bottom-2 left-2">
-          <RatingCircle rating={rating} />
         </div>
       </div>
-      <div className="p-2 space-y-1">
-        <h3 className="text-white text-sm font-medium line-clamp-1">
-          {title}
-        </h3>
-        {releaseDate && (
-          <span className="text-gray-400 text-xs">
-            {new Date(releaseDate).getFullYear()}
-          </span>
-        )}
+
+      {/* Info below poster */}
+      <div className="px-2.5 pt-2 pb-2.5 bg-[#0d1117]">
+        <p className="text-white text-[13px] font-semibold leading-tight line-clamp-1">{title}</p>
+        {year && <p className="text-gray-500 text-[11px] mt-0.5">{year}</p>}
       </div>
     </motion.div>
   );
 });
 
-RatingCircle.propTypes = {
-  rating: PropTypes.number,
-};
-
 ContentCard.propTypes = {
   title: PropTypes.string.isRequired,
-  poster: PropTypes.string.isRequired,
+  poster: PropTypes.string,
   rating: PropTypes.number,
   onClick: PropTypes.func,
   className: PropTypes.string,

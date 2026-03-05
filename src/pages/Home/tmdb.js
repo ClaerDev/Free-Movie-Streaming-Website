@@ -2,7 +2,7 @@
 const VALID_TYPES = ['movie', 'tv'];
 
 // Static mapping of genres
-const GENRES = {
+export const GENRES = {
   movie: [
     { id: 28, name: 'Action' },
     { id: 12, name: 'Adventure' },
@@ -51,4 +51,26 @@ export const fetchGenres = async (type) => {
 
   // Return the genres from the static mapping
   return GENRES[type];
+};
+
+// Special curated categories that require custom TMDB API params (use negative IDs)
+export const SPECIAL_CATEGORIES = {
+  movie: [
+    { id: -1, name: 'Anime' },
+  ],
+  tv: [
+    { id: -1, name: 'Anime' },
+    { id: -2, name: 'K-Drama' },
+    { id: -3, name: 'C-Drama' },
+    { id: -4, name: 'Donghua' },
+  ],
+};
+
+// Maps special category key "<id>_<type>" to extra TMDB discover params
+export const SPECIAL_PARAMS = {
+  '-1_movie': { with_genres: '16', with_keywords: '210024' },          // Anime movies
+  '-1_tv':    { with_genres: '16', with_keywords: '210024' },          // Anime TV
+  '-2_tv':    { with_origin_country: 'KR', with_genres: '18' },       // K-Drama
+  '-3_tv':    { with_origin_country: 'CN', with_genres: '18' },       // C-Drama
+  '-4_tv':    { with_origin_country: 'CN', with_genres: '16' },       // Donghua
 };

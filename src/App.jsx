@@ -1,16 +1,27 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Home from './pages/Home/Home';
-
+import ParentComponent from './pages/Home/ParentComponent';
+import HomePage from './pages/Home/HomePage';
+import Movie from './pages/Home/Movie/Movie';
+import Series from './pages/Home/TV/Series';
+import SearchPage from './pages/Home/SearchPage';
+import MovieDetails from './pages/Home/Movie/MovieDetails';
+import TvDetails from './pages/Home/TV/TvDetails';
 
 function App() {
-
   return (
     <Router>
       <Routes>
-        <Route path="/" element={ <Home />} />
+        <Route element={<ParentComponent />}>
+          <Route index element={<HomePage />} />
+          <Route path="/movies" element={<Movie />} />
+          <Route path="/series" element={<Series />} />
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="/movie/:slug" element={<MovieDetails />} />
+          <Route path="/tv/:slug" element={<TvDetails />} />
+        </Route>
       </Routes>
     </Router>
-  )
+  );
 }
 
-export default App
+export default App;

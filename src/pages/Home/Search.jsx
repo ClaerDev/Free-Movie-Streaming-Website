@@ -82,8 +82,12 @@ const ResultItem = memo(({ item, isSelected, onSelect, onHover }) => {
   );
 });
 
-const SearchResults = memo(({ results, selectedIndex, onMouseEnter, onClick }) => (
-  <div className="absolute z-10 mt-2 max-h-60 w-full bg-black/95 backdrop-blur-sm rounded-lg overflow-y-auto shadow-lg border border-gray-800">
+const SearchResults = memo(({ results, selectedIndex, onMouseEnter, onClick, variant }) => (
+  <div className={`absolute z-50 mt-1 max-h-96 bg-black/95 backdrop-blur-sm rounded-lg overflow-y-auto shadow-2xl border border-gray-800
+    ${ variant === 'sidebar'
+        ? 'left-full top-0 ml-3 w-80'
+        : 'w-full mt-2'
+    }`}>
     {results.map((item, index) => (
       <ResultItem
         key={item.id}
@@ -161,7 +165,7 @@ const useSearchLogic = () => {
   };
 };
 
-const Search = forwardRef(({ onFocus, onBlur, isActive }, ref) => {
+const Search = forwardRef(({ onFocus, onBlur, isActive, variant = 'top' }, ref) => {
   const { selectMovie } = useMovie();
   const { selectSeries } = useSeries();
   const { state, setState, handleSearch, debouncedSearch } = useSearchLogic();
@@ -218,10 +222,64 @@ const Search = forwardRef(({ onFocus, onBlur, isActive }, ref) => {
   }, [query, debouncedSearch, handleSearch]);
 
   const searchInputClasses = useMemo(() => `
-    w-full bg-gray-800 text-white px-6 py-1.5 rounded-full text-sm
+    w-full text-white px-4 py-2 rounded-lg text-sm
     focus:outline-none focus:ring-2 focus:ring-red-600 transition-all duration-200
-    ${isActive ? 'ring-2 ring-white' : ''}
-  `, [isActive]);
+    ${variant === 'sidebar' ? 'bg-gray-800/80 placeholder-gray-500' : 'bg-gray-800 px-6 py-1.5 rounded-full'}
+    ${isActive && variant !== 'sidebar' ? 'ring-2 ring-white' : ''}
+  `, [isActive, variant]);
+
+  if (variant === 'sidebar') {
+    return (
+      <div className="relative w-full px-3 py-2">
+        <div className="relative">
+          <FaSearch className="absolute left-3 top-2.5 text-gray-500 text-xs pointer-events-none" />
+          <input
+            ref={ref}
+            type="text"
+            placeholder="Search..."
+            value={query}
+            onChange={e => setState(prev => ({ ...prev, query: e.target.value }))}
+            onKeyDown={handleKeyNavigation}
+            onFocus={onFocus}
+            onBlur={onBlur}
+            autoFocus
+            className="w-full bg-gray-800/80 text-white text-sm pl-8 pr-7 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 placeholder-gray-500 transition-all duration-200"
+            aria-label="Search for movies and TV shows"
+          />
+          {loading && (
+            <div className="absolute right-2 top-2.5">
+              <div className="animate-spin h-3.5 w-3.5 border-2 border-red-600 border-t-transparent rounded-full" />
+            </div>
+          )}
+          {query && !loading && (
+            <button
+              onClick={clearSearch}
+              className="absolute right-2 top-2.5 text-gray-500 hover:text-white transition-colors duration-200"
+              aria-label="Clear search"
+            >
+              <FaTimes className="text-xs" />
+            </button>
+          )}
+        </div>
+        {results.length > 0 && (
+          <SearchResults
+            results={results}
+            selectedIndex={selectedIndex}
+            onMouseEnter={index => setState(prev => ({ ...prev, selectedIndex: index }))}
+            onClick={item => {
+              const handler = item.media_type === 'movie' ? selectMovie : selectSeries;
+              handler(item);
+              clearSearch();
+            }}
+            variant="sidebar"
+          />
+        )}
+        {error && (
+          <p className="mt-1 text-red-500 text-xs px-1">{error}</p>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="relative bg-black/90 w-full px-2 py-2">
@@ -269,6 +327,7 @@ const Search = forwardRef(({ onFocus, onBlur, isActive }, ref) => {
               handler(item);
               clearSearch();
             }}
+            variant={variant}
           />
         )}
       </div>
@@ -310,6 +369,7 @@ Search.propTypes = {
   onFocus: PropTypes.func,
   onBlur: PropTypes.func,
   isActive: PropTypes.bool,
+  variant: PropTypes.oneOf(['top', 'sidebar']),
 };
 
 Search.displayName = 'Search';

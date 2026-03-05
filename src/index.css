@@ -59,6 +59,15 @@ body {
   border-radius: 4px;
 }
 
+/* Completely hide scrollbar while keeping scroll functionality */
+.hide-scrollbar {
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* IE / Edge */
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;                /* Chrome / Safari / Opera */
+}
+
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: #6b7280;
 }
