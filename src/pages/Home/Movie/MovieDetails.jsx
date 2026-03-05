@@ -158,6 +158,7 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
 
       {/* ══════ PLAYER ══════ */}
       <div className="px-3 sm:px-5 md:px-10 lg:px-16 pt-5 pb-6 md:pb-10">
+        <div className="w-full max-w-[1100px] mx-auto">
         {/* Player header */}
         <div className="flex items-center gap-3 mb-4 bg-white/[0.03] border border-white/[0.07] rounded-2xl px-4 py-3">
           <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-red-600/25 border border-red-500/40 shrink-0">
@@ -199,6 +200,7 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
             </a>
             {" "}in your browser.
           </p>
+        </div>
         </div>
       </div>
 
