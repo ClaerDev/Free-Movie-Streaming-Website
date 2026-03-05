@@ -21,8 +21,7 @@ function Movie() {
 
   const allCategories = [
     { id: null, name: 'Trending' },
-    ...GENRES.movie,
-    ...SPECIAL_CATEGORIES.movie,
+    ...[...GENRES.movie, ...SPECIAL_CATEGORIES.movie].sort((a, b) => a.name.localeCompare(b.name)),
   ];
 
   const genre =

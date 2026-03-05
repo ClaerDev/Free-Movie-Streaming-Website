@@ -20,8 +20,7 @@ function Series() {
 
   const allCategories = [
     { id: null, name: 'Trending' },
-    ...GENRES.tv,
-    ...SPECIAL_CATEGORIES.tv,
+    ...[...GENRES.tv, ...SPECIAL_CATEGORIES.tv].sort((a, b) => a.name.localeCompare(b.name)),
   ];
 
   const genre =

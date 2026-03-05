@@ -58,7 +58,6 @@ export const SPECIAL_CATEGORIES = {
   movie: [
     { id: -1, name: 'Anime' },
     { id: -2, name: 'Thai Movie' },
-    { id: -3, name: '+ Movies' },
   ],
   tv: [
     { id: -1, name: 'Anime' },

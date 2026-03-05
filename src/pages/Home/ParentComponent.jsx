@@ -61,6 +61,67 @@ function ParentComponent() {
       {/* Page content */}
       <div className="md:pl-[84px] pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-0">
         <Outlet />
+
+        {/* Footer — home page only */}
+        {location.pathname === '/' && <footer className="bg-[#0a0c12]">
+          {/* Top gradient divider */}
+          <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+
+          <div className="max-w-5xl mx-auto px-6 pt-12 pb-8">
+
+            {/* Main row */}
+            <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-10">
+
+              {/* Brand block */}
+              <div className="flex flex-col items-center sm:items-start gap-3">
+                <span className="text-2xl font-black tracking-tight">
+                  We<span className="text-red-500">Flix</span>
+                </span>
+                <p className="text-gray-500 text-xs leading-relaxed text-center sm:text-left max-w-[220px]">
+                  Free streaming powered by TMDB.<br />For entertainment purposes only.
+                </p>
+                <p className="text-gray-600 text-[11px]">
+                  Developed by <span className="text-gray-400 font-semibold">Phyo Min Thein</span>
+                </p>
+              </div>
+
+              {/* Nav links */}
+              <div className="flex flex-col items-center sm:items-start gap-2">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-gray-600 font-bold mb-1">Browse</p>
+                {[
+                  { label: 'Home',     page: 'home'   },
+                  { label: 'Movies',   page: 'movies' },
+                  { label: 'TV Shows', page: 'series' },
+                  { label: 'Search',   page: 'search' },
+                ].map(({ label, page }) => (
+                  <button
+                    key={page}
+                    onClick={() => handleNavigation(page)}
+                    className="text-gray-500 hover:text-white text-sm transition-colors duration-150"
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Bottom bar */}
+            <div className="mt-10 pt-5 border-t border-white/[0.05] flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-gray-600">
+              <span>© {new Date().getFullYear()} WeFlix. All rights reserved.</span>
+              <span>
+                Movie &amp; TV data by{' '}
+                <a
+                  href="https://www.themoviedb.org"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-500 hover:text-white underline underline-offset-2 transition-colors"
+                >
+                  TMDB
+                </a>
+              </span>
+            </div>
+          </div>
+        </footer>}
       </div>
 
       {/* Mobile bottom navigation */}

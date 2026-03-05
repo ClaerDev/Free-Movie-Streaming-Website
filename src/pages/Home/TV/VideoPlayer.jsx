@@ -6,7 +6,7 @@ const VideoPlayer = ({ tvId, season = 1, episode = 1 }) => {
 
     useEffect(() => { setActive(false); }, [tvId, season, episode]);
 
-    const iframeSrc = `https://vidlink.pro/tv/${tvId}/${season}/${episode}?nextbutton=true`;
+    const iframeSrc = `https://vidlink.pro/tv/${tvId}/${season}/${episode}?nextbutton=true&autoplay=true&muted=false`;
 
     return (
         <div className="relative w-full h-full">
@@ -19,14 +19,6 @@ const VideoPlayer = ({ tvId, season = 1, episode = 1 }) => {
                 loading="lazy"
                 referrerPolicy="no-referrer"
             />
-            {!active && (
-                <div
-                    className="absolute inset-0 z-10"
-                    onClick={() => setActive(true)}
-                    onWheel={(e) => window.scrollBy({ top: e.deltaY, behavior: 'auto' })}
-                    title="Click to interact with player"
-                />
-            )}
         </div>
     );
 }

@@ -8,7 +8,7 @@ const VideoPlayer = ({ movieId }) => {
 
     if (!movieId) return null;
 
-    const iframeSrc = `https://vidlink.pro/movie/${movieId}?nextbutton=true`;
+    const iframeSrc = `https://vidlink.pro/movie/${movieId}?nextbutton=true&autoplay=true&muted=false`;
 
     return (
         <div className="relative w-full h-full">
@@ -21,14 +21,6 @@ const VideoPlayer = ({ movieId }) => {
                 className="absolute inset-0 w-full h-full"
                 style={{ userSelect: 'none' }}
             />
-            {!active && (
-                <div
-                    className="absolute inset-0 z-10"
-                    onClick={() => setActive(true)}
-                    onWheel={(e) => window.scrollBy({ top: e.deltaY, behavior: 'auto' })}
-                    title="Click to interact with player"
-                />
-            )}
         </div>
     );
 };

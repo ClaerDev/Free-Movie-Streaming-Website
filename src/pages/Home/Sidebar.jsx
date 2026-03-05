@@ -25,11 +25,9 @@ function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
 
   const showCategories = activePage === 'movies' || activePage === 'series';
   const genreType = activePage === 'movies' ? 'movie' : 'tv';
-  const genres = showCategories ? GENRES[genreType] : [];
-  const specials = showCategories ? SPECIAL_CATEGORIES[genreType] : [];
-  const adultIds = genreType === 'movie' ? [-3] : [-6];
-  const adultSpecials = specials.filter((cat) => adultIds.includes(cat.id));
-  const regularSpecials = specials.filter((cat) => !adultIds.includes(cat.id));
+  const allCategories = showCategories
+    ? [...GENRES[genreType], ...SPECIAL_CATEGORIES[genreType]].sort((a, b) => a.name.localeCompare(b.name))
+    : [];
 
   return (
     <aside className="
@@ -109,7 +107,7 @@ function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
             </div>
             {/* Scrollable genre list */}
             <div className="flex-1 overflow-y-auto hide-scrollbar px-[10px] flex flex-col gap-0.5">
-              {genres.map((genre) => {
+              {allCategories.map((genre) => {
                 const isActiveGenre = selectedGenreId === genre.id;
                 return (
                   <button
@@ -139,48 +137,6 @@ function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
                   </button>
                 );
               })}
-
-              {/* Special categories: Anime, K-Drama, etc. */}
-              {regularSpecials.length > 0 && (
-                <>
-                  <div className="mx-1 my-2 h-px bg-white/[0.06] shrink-0" />
-                  <div className="px-4 mb-1 shrink-0">
-                    <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-75 text-[10px] font-bold tracking-[0.22em] uppercase text-gray-600 whitespace-nowrap">
-                      Special
-                    </span>
-                  </div>
-                  {regularSpecials.map((cat) => {
-                    const isActive = selectedGenreId === cat.id;
-                    return (
-                      <button
-                        key={cat.id}
-                        onClick={() => onGenreSelect && onGenreSelect(cat.id)}
-                        title={cat.name}
-                        className={`
-                          relative flex items-center gap-4 px-4 py-2.5 rounded-2xl
-                          w-full text-[13px] font-medium whitespace-nowrap
-                          transition-all duration-200 focus:outline-none text-left
-                          ${isActive
-                            ? 'bg-red-500/15 text-white ring-1 ring-red-500/30'
-                            : 'text-gray-500 hover:text-gray-200 hover:bg-white/5'
-                          }
-                        `}
-                      >
-                        {isActive && (
-                          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-red-500" />
-                        )}
-                        <span className={`
-                          w-2 h-2 rounded-full shrink-0 transition-all duration-150
-                          ${isActive ? 'bg-red-400' : 'bg-gray-700'}
-                        `} />
-                        <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-75">
-                          {cat.name}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </>
-              )}
             </div>
           </div>
         </>
