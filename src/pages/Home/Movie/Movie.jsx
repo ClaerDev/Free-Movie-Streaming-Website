@@ -36,7 +36,7 @@ function Movie() {
 
   const handleGenreChip = (id) => {
     if (id === null) setSearchParams({});
-    else setSearchParams({ genre: id });
+    else setSearchParams({ genre: id, sort: 'popularity.desc' });
   };
 
   return (

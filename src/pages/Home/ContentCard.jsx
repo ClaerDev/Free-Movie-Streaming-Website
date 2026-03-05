@@ -9,7 +9,7 @@ const ContentCard = memo(({
   rating,
   onClick = () => {},
   className = '',
-  placeholderImage = '/assets/images/placeholder.jpg',
+  placeholderImage = '/placeholder.svg',
   releaseDate,
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);

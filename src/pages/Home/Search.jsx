@@ -1,4 +1,4 @@
-import { useState, forwardRef, useEffect, useCallback, useMemo , memo } from 'react';
+import { useState, forwardRef, useEffect, useCallback, useMemo, useRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import { FaSearch, FaTimes } from 'react-icons/fa';
 import { useMovie } from './MoviesContext';
@@ -108,10 +108,11 @@ const useSearchLogic = () => {
     selectedIndex: -1,
     error: null
   });
+  const abortRef = useRef(null);
+  const requestIdRef = useRef(0);
+  const lastSuccessRef = useRef({ query: '', results: [] });
 
-  const searchRequest = useCallback(async (searchQuery) => {
-    if (!searchQuery?.trim()) return [];
-    
+  const runMultiSearch = useCallback(async (searchQuery, signal) => {
     const url = new URL(`${CONFIG.BASE_URL}/search/multi`);
     url.searchParams.append('api_key', CONFIG.API_KEY);
     url.searchParams.append('query', searchQuery);
@@ -119,14 +120,81 @@ const useSearchLogic = () => {
     url.searchParams.append('page', '1');
     url.searchParams.append('include_adult', 'false');
 
-    const response = await fetch(url);
+    const response = await fetch(url, { signal });
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    
+
     const data = await response.json();
-    return data.results
+    return (data.results ?? [])
       .filter(item => ['movie', 'tv'].includes(item.media_type))
       .slice(0, CONFIG.MAX_RESULTS);
   }, []);
+
+  const runTypedSearch = useCallback(async (searchQuery, signal) => {
+    const [tvResponse, movieResponse] = await Promise.all(
+      ['tv', 'movie'].map(async (type) => {
+        const url = new URL(`${CONFIG.BASE_URL}/search/${type}`);
+        url.searchParams.append('api_key', CONFIG.API_KEY);
+        url.searchParams.append('query', searchQuery);
+        url.searchParams.append('language', 'en-US');
+        url.searchParams.append('page', '1');
+        url.searchParams.append('include_adult', 'false');
+
+        const response = await fetch(url, { signal });
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        return (data.results ?? []).map(item => ({ ...item, media_type: type }));
+      })
+    );
+
+    const merged = [...tvResponse, ...movieResponse];
+    const deduped = [];
+    const seen = new Set();
+    for (const item of merged) {
+      const key = `${item.media_type}-${item.id}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      deduped.push(item);
+      if (deduped.length >= CONFIG.MAX_RESULTS) break;
+    }
+    return deduped;
+  }, []);
+
+  const searchRequest = useCallback(async (searchQuery, signal) => {
+    const normalized = searchQuery?.trim().replace(/\s+/g, ' ');
+    if (!normalized) return [];
+
+    const primary = await runMultiSearch(normalized, signal);
+    if (primary.length > 0 || normalized.length < 4) return primary;
+
+    const typedPrimary = await runTypedSearch(normalized, signal);
+    if (typedPrimary.length > 0) return typedPrimary;
+
+    const words = normalized.split(' ').filter(Boolean);
+    const fallbackCandidates = [
+      words.length > 1 ? words.slice(0, -1).join(' ').trim() : '',
+      normalized.slice(0, -1).trim(),
+      normalized.slice(0, -2).trim(),
+    ].filter(Boolean);
+
+    const tried = new Set([normalized]);
+    for (const candidate of fallbackCandidates) {
+      if (candidate.length < 3 || tried.has(candidate)) continue;
+      tried.add(candidate);
+
+      const fallback = await runMultiSearch(candidate, signal);
+      if (fallback.length > 0) return fallback;
+
+      const typedFallback = await runTypedSearch(candidate, signal);
+      if (typedFallback.length > 0) return typedFallback;
+    }
+
+    const last = lastSuccessRef.current;
+    if (last.results.length > 0 && normalized.startsWith(last.query)) {
+      return last.results;
+    }
+
+    return primary;
+  }, [runMultiSearch, runTypedSearch]);
 
   const debouncedSearch = useMemo(() => {
     let timeoutId;
@@ -138,16 +206,34 @@ const useSearchLogic = () => {
   }, []);
 
   const handleSearch = useCallback(async (searchQuery) => {
+    const normalized = searchQuery?.trim().replace(/\s+/g, ' ');
+    if (!normalized) {
+      setState(prev => ({ ...prev, loading: false, results: [], selectedIndex: -1, error: null }));
+      return;
+    }
+
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const currentRequestId = ++requestIdRef.current;
+
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
-      const results = await searchRequest(searchQuery);
-      setState(prev => ({ 
+      const results = await searchRequest(normalized, controller.signal);
+      if (controller.signal.aborted || currentRequestId !== requestIdRef.current) return;
+
+      if (results.length > 0) {
+        lastSuccessRef.current = { query: normalized, results };
+      }
+
+      setState(prev => ({
         ...prev, 
         results,
         selectedIndex: -1,
         loading: false 
       }));
-    } catch (error) {
+    } catch {
+      if (controller.signal.aborted || currentRequestId !== requestIdRef.current) return;
       setState(prev => ({
         ...prev,
         error: 'Please check your internet connection.',
@@ -157,21 +243,33 @@ const useSearchLogic = () => {
     }
   }, [searchRequest]);
 
+  const cancelActiveSearch = useCallback(() => {
+    abortRef.current?.abort();
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, []);
+
   return {
     state,
     setState,
     handleSearch,
-    debouncedSearch
+    debouncedSearch,
+    cancelActiveSearch
   };
 };
 
 const Search = forwardRef(({ onFocus, onBlur, isActive, variant = 'top' }, ref) => {
   const { selectMovie } = useMovie();
   const { selectSeries } = useSeries();
-  const { state, setState, handleSearch, debouncedSearch } = useSearchLogic();
+  const { state, setState, handleSearch, debouncedSearch, cancelActiveSearch } = useSearchLogic();
   const { query, loading, results, selectedIndex, error } = state;
 
   const clearSearch = useCallback(() => {
+    cancelActiveSearch();
     setState(prev => ({
       ...prev,
       query: '',
@@ -179,7 +277,7 @@ const Search = forwardRef(({ onFocus, onBlur, isActive, variant = 'top' }, ref) 
       selectedIndex: -1,
       error: null
     }));
-  }, [setState]);
+  }, [cancelActiveSearch, setState]);
 
   const handleKeyNavigation = useCallback((e) => {
     if (results.length === 0) return;
@@ -362,7 +460,8 @@ SearchResults.propTypes = {
   results: PropTypes.arrayOf(itemPropType).isRequired,
   selectedIndex: PropTypes.number.isRequired,
   onMouseEnter: PropTypes.func.isRequired,
-  onClick: PropTypes.func.isRequired
+  onClick: PropTypes.func.isRequired,
+  variant: PropTypes.oneOf(['top', 'sidebar'])
 };
 
 Search.propTypes = {

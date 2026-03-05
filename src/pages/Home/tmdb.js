@@ -74,7 +74,7 @@ export const SPECIAL_PARAMS = {
   '-1_tv':    { with_genres: '16', with_keywords: '210024' },          // Anime TV
   '-2_movie': { with_origin_country: 'TH' },                           // Thai Movie
   '-2_tv':    { with_origin_country: 'KR', with_genres: '18' },       // K-Drama
-  '-3_tv':    { with_origin_country: 'CN', with_genres: '18' },       // C-Drama
-  '-4_tv':    { with_origin_country: 'CN', with_genres: '16' },       // Donghua
+  '-3_tv':    { with_origin_country: 'CN', without_genres: '16' }, // C-Drama (exclude donghua/animation)
+  '-4_tv':    { with_genres: '16', with_original_language: 'zh' },    // Donghua (Chinese-language animation)
   '-5_tv':    { with_origin_country: 'TH', with_genres: '18' },       // Thai Drama
 };
