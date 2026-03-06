@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 
 const SITE_NAME = 'WeFlix';
-const SITE_URL  = import.meta.env.VITE_SITE_URL || 'https://weflix.app';
+const SITE_URL  = import.meta.env.VITE_SITE_URL || 'https://www.weflix.app';
 const DEFAULT_IMAGE = `${SITE_URL}/weflix2.png`;
 
 /**
@@ -34,7 +34,20 @@ export default function SEO({
     'Discover and stream trending movies and TV shows. Browse by genre, search titles, and watch instantly — powered by TMDB.';
 
   const metaImage  = image  || DEFAULT_IMAGE;
-  const canonical  = url    || (typeof window !== 'undefined' ? window.location.href : SITE_URL);
+  const canonical  = (() => {
+    const raw = url || (typeof window !== 'undefined' ? window.location.href : SITE_URL);
+    try {
+      const parsed = new URL(raw);
+      const preferred = new URL(SITE_URL);
+      parsed.protocol = preferred.protocol;
+      parsed.hostname = preferred.hostname;
+      parsed.port = '';
+      parsed.hash = '';
+      return parsed.toString();
+    } catch {
+      return SITE_URL;
+    }
+  })();
 
   return (
     <Helmet>

@@ -4,4 +4,4 @@ Allow: /
 # Block API keys or private routes if any
 Disallow: /api/
 
-Sitemap: https://weflix.app/sitemap.xml
+Sitemap: https://www.weflix.app/sitemap.xml
