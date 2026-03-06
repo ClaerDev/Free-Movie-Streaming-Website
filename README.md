@@ -102,7 +102,7 @@ src/
     │   ├── Movie.jsx            # Movies browse page (trending default, genre + sort filters)
     │   ├── MovieDetails.jsx     # Movie detail page — hero backdrop, player, production info
     │   ├── VideoPlayer.jsx      # Movie iframe player (vidlink.pro) with scroll overlay
-    ├── Resused/
+    ├── Reused/
     │   ├── DetailPageSkeleton.jsx # Movies browse page (trending default, genre + sort filters)
     └── TV/
         ├── Series.jsx           # TV Shows browse page (trending default, genre + sort filters)

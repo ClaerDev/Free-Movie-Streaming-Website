@@ -5,7 +5,7 @@ import { fetchMovieDetails, fetchRelatedMovies } from "../Fetcher";
 import { getIdFromDetailSlug, toDetailPath } from "../urlUtils";
 import { FaRedo, FaStar, FaArrowLeft, FaFilm } from "react-icons/fa";
 import { BiCalendar, BiTime, BiGlobe } from "react-icons/bi";
-import DetailPageSkeleton from "../resused/DetailPageSkeleton";
+import DetailPageSkeleton from "../reused/DetailPageSkeleton";
 import VideoPlayer from "./VideoPlayer";
 import SEO from "../SEO";
 import ContentCard from "../ContentCard";

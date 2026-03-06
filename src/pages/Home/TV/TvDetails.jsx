@@ -13,7 +13,7 @@ import { fetchSeriesDetails, fetchAllEpisodes, fetchRelatedSeries } from "../Fet
 import { getIdFromDetailSlug, toDetailPath } from "../urlUtils";
 import { FaRedo, FaStar, FaArrowLeft, FaTv } from "react-icons/fa";
 import { BiCalendar, BiGlobe, BiTv, BiChevronLeft, BiChevronRight, BiSearch } from "react-icons/bi";
-import DetailPageSkeleton from "../resused/DetailPageSkeleton";
+import DetailPageSkeleton from "../reused/DetailPageSkeleton";
 import VideoPlayer from "./VideoPlayer";
 import SEO from "../SEO";
 import ContentCard from "../ContentCard";
