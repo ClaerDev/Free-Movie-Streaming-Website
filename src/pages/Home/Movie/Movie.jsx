@@ -57,6 +57,8 @@ function Movie() {
     navigate(buildBrowsePath('movie', id, 'popularity.desc'));
   };
 
+  const activeSortLabel = SORT_OPTIONS.find((opt) => opt.value === sortBy)?.label || 'Most Popular';
+
   return (
     <div className="flex flex-col min-h-screen">
       <SEO
@@ -67,8 +69,9 @@ function Movie() {
             : 'Browse and stream trending movies free on WeFlix. Discover the most popular, top-rated, and newest films across all genres.'
         }
       />
-      {/* Page header */}
-      <div className="px-4 sm:px-6 pt-6 pb-3">
+      {/* Sticky context header */}
+      <div className="sticky top-0 z-40 backdrop-blur-md bg-[#0b0f18]/80 border-b border-white/[0.06]">
+      <div className="px-4 sm:px-6 pt-4 pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-red-600/20 flex items-center justify-center">
@@ -103,6 +106,27 @@ function Movie() {
             </div>
           )}
         </div>
+
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center rounded-full border border-white/[0.1] bg-white/[0.03] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-400">
+            Movies
+          </span>
+          <span className="inline-flex items-center rounded-full border border-red-500/30 bg-red-500/12 px-3 py-1 text-[11px] font-semibold text-red-300">
+            {genre?.name ?? 'Trending'}
+          </span>
+          <span className="inline-flex items-center rounded-full border border-white/[0.1] bg-white/[0.03] px-3 py-1 text-[11px] font-semibold text-gray-300">
+            {activeSortLabel}
+          </span>
+          {(genreId || sortBy !== 'popularity.desc') && (
+            <button
+              onClick={() => navigate('/movies')}
+              className="inline-flex items-center rounded-full border border-white/[0.12] bg-white/[0.04] px-3 py-1 text-[11px] font-semibold text-gray-300 hover:text-white hover:bg-white/[0.08] transition-colors motion-fast"
+            >
+              Clear Filters
+            </button>
+          )}
+        </div>
+      </div>
       </div>
 
       {/* Mobile genre chips — hidden on md+ (sidebar handles it there) */}
@@ -133,6 +157,7 @@ function Movie() {
           type="movie"
           onSelect={handleSelect}
           sortBy={sortBy}
+          onReset={() => navigate('/movies')}
         />
       </main>
     </div>

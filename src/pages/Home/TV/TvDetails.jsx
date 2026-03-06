@@ -8,13 +8,14 @@ import React, {
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 import { motion } from "framer-motion";
-import { fetchSeriesDetails, fetchAllEpisodes } from "../Fetcher";
+import { fetchSeriesDetails, fetchAllEpisodes, fetchRelatedSeries } from "../Fetcher";
 import { getIdFromDetailSlug, toDetailPath } from "../urlUtils";
 import { FaRedo, FaStar, FaArrowLeft, FaTv } from "react-icons/fa";
 import { BiCalendar, BiGlobe, BiTv, BiChevronLeft, BiChevronRight, BiSearch } from "react-icons/bi";
 import Loadingspinner from "../resused/Loadingspinner";
 import VideoPlayer from "./VideoPlayer";
 import SEO from "../SEO";
+import ContentCard from "../ContentCard";
 
 const MemoizedVideoPlayer = memo(VideoPlayer);
 
@@ -36,13 +37,6 @@ const MetaBadge = ({ icon: Icon, children }) => (
   </span>
 );
 
-const MetaCard = ({ label, value }) => (
-  <div className="flex flex-col gap-1.5 bg-white/[0.04] border border-white/[0.1] hover:bg-white/[0.08] hover:border-white/[0.16] rounded-2xl px-5 py-4 min-w-[120px] transition-colors duration-200">
-    <p className="text-gray-500 text-[10px] uppercase tracking-[0.18em] font-bold">{label}</p>
-    <p className="text-white text-sm font-bold leading-snug">{value}</p>
-  </div>
-);
-
 const TvDetails = ({ tvId: tvIdProp }) => {
   const { slug } = useParams();
   const location = useLocation();
@@ -59,6 +53,8 @@ const TvDetails = ({ tvId: tvIdProp }) => {
   const [showOverview,   setShowOverview]   = useState(false);
   const [episodeQuery,   setEpisodeQuery]   = useState('');
   const [isDraggingEpisodes, setIsDraggingEpisodes] = useState(false);
+  const [isDraggingRelated, setIsDraggingRelated] = useState(false);
+  const [related, setRelated] = useState([]);
 
   const handleBack = () => {
     if (location.state?.from) {
@@ -72,17 +68,22 @@ const TvDetails = ({ tvId: tvIdProp }) => {
   const episodeListRef   = useRef(null);
   const dragStateRef     = useRef({ active: false, startX: 0, startScrollLeft: 0, moved: false });
   const suppressClickRef = useRef(false);
+  const relatedListRef = useRef(null);
+  const relatedDragStateRef = useRef({ active: false, startX: 0, startScrollLeft: 0, moved: false });
+  const suppressRelatedClickRef = useRef(false);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     setRetrying(true);
     try {
-      const [seriesData, seasonsData] = await Promise.all([
+      const [seriesData, seasonsData, relatedData] = await Promise.all([
         fetchSeriesDetails(tvId),
         fetchAllEpisodes(tvId),
+        fetchRelatedSeries(tvId),
       ]);
       setTv(seriesData);
+      setRelated((relatedData ?? []).filter((item) => item?.id && item.id !== seriesData.id).slice(0, 18));
       const filtered = (seasonsData ?? [])
         .filter(s => s.season_number > 0)
         .sort((a, b) => a.season_number - b.season_number);
@@ -181,10 +182,50 @@ const TvDetails = ({ tvId: tvIdProp }) => {
     }, 0);
   }, []);
 
+  const onRelatedMouseDown = useCallback((e) => {
+    if (e.button !== 0) return;
+    const el = relatedListRef.current;
+    if (!el) return;
+    relatedDragStateRef.current = {
+      active: true,
+      startX: e.pageX,
+      startScrollLeft: el.scrollLeft,
+      moved: false,
+    };
+    setIsDraggingRelated(true);
+  }, []);
+
+  const onRelatedMouseMove = useCallback((e) => {
+    const el = relatedListRef.current;
+    const drag = relatedDragStateRef.current;
+    if (!el || !drag.active) return;
+
+    const delta = e.pageX - drag.startX;
+    if (Math.abs(delta) > 4) drag.moved = true;
+    el.scrollLeft = drag.startScrollLeft - delta;
+  }, []);
+
+  const endRelatedDrag = useCallback(() => {
+    const drag = relatedDragStateRef.current;
+    if (!drag.active) return;
+    drag.active = false;
+    suppressRelatedClickRef.current = drag.moved;
+    setIsDraggingRelated(false);
+
+    setTimeout(() => {
+      suppressRelatedClickRef.current = false;
+    }, 0);
+  }, []);
+
   useEffect(() => {
     window.addEventListener('mouseup', endEpisodeDrag);
     return () => window.removeEventListener('mouseup', endEpisodeDrag);
   }, [endEpisodeDrag]);
+
+  useEffect(() => {
+    window.addEventListener('mouseup', endRelatedDrag);
+    return () => window.removeEventListener('mouseup', endRelatedDrag);
+  }, [endRelatedDrag]);
 
   if (loading) return (
     <div className="min-h-[60vh] flex items-center justify-center">
@@ -217,6 +258,12 @@ const TvDetails = ({ tvId: tvIdProp }) => {
   const truncated = overview.length > 240 && !showOverview
     ? overview.slice(0, 240) + "…"
     : overview;
+
+  const handleRelatedSelect = (item) => {
+    navigate(toDetailPath('tv', item.id, item.name || item.title), {
+      state: { from: location.pathname + location.search },
+    });
+  };
 
   return (
     <div className="min-h-screen bg-[#0b0b0f] text-white">      <SEO
@@ -598,26 +645,37 @@ const TvDetails = ({ tvId: tvIdProp }) => {
       </div>
 
       {/* ── Details cards ────────────────────────── */}
-      {(tv.networks?.length > 0 || tv.status) && (
-        <div className="px-3 sm:px-5 md:px-10 lg:px-16 pb-20">
+      {related.length > 0 && (
+        <section className="px-3 sm:px-5 md:px-10 lg:px-16 pb-10">
           <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="flex-1 h-px bg-white/[0.07]" />
-            <h3 className="text-[11px] uppercase tracking-[0.22em] text-gray-500 font-bold">Details</h3>
-            <div className="flex-1 h-px bg-white/[0.07]" />
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg md:text-xl font-black tracking-tight">More Like This</h3>
+              <span className="text-[11px] uppercase tracking-[0.16em] text-gray-500 font-semibold">Recommended</span>
+            </div>
+            <div
+              ref={relatedListRef}
+              onMouseDown={onRelatedMouseDown}
+              onMouseMove={onRelatedMouseMove}
+              onMouseLeave={endRelatedDrag}
+              className={`grid grid-flow-col auto-cols-[155px] md:auto-cols-[170px] gap-3 overflow-x-auto hide-scrollbar pb-2 select-none ${isDraggingRelated ? 'cursor-grabbing' : 'cursor-grab'}`}
+            >
+              {related.map((item) => (
+                <div key={item.id} className="shrink-0">
+                  <ContentCard
+                    title={item.name || item.title}
+                    poster={item.poster_path ? `https://image.tmdb.org/t/p/w342${item.poster_path}` : '/placeholder.svg'}
+                    rating={item.vote_average}
+                    releaseDate={item.first_air_date}
+                    onClick={() => {
+                      if (suppressRelatedClickRef.current) return;
+                      handleRelatedSelect(item);
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
-            {tv.networks?.length > 0 && (
-              <MetaCard label="Network" value={tv.networks.slice(0, 2).map(n => n.name).join(", ")} />
-            )}
-            {tv.status && <MetaCard label="Status" value={tv.status} />}
-            {tv.type && <MetaCard label="Type" value={tv.type} />}
-            {tv.production_countries?.length > 0 && (
-              <MetaCard label="Country" value={tv.production_countries.map(c => c.name).join(", ")} />
-            )}
-          </div>
-          </div>
-        </div>
+        </section>
       )}
 
     </div>

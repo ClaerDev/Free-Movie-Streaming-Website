@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useInfiniteQuery } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
 import { toDetailPath } from './urlUtils';
 import { FaSearch, FaTimes } from 'react-icons/fa';
 import { BiMoviePlay, BiTv } from 'react-icons/bi';
@@ -16,7 +17,7 @@ const CONFIG = {
   DEBOUNCE_DELAY: 350,
 };
 
-const GRID_CLASSES = 'grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-1 mt-4';
+const GRID_CLASSES = 'grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3 sm:gap-4 mt-4';
 
 const ALL_CATEGORIES = [
   ...GENRES.movie.map(g => ({ ...g, mediaType: 'movie', path: buildBrowsePath('movie', g.id, 'popularity.desc') })),
@@ -32,7 +33,7 @@ const UNIQUE_CATEGORIES = ALL_CATEGORIES.filter(
 const SkeletonGrid = ({ count = 14 }) => (
   <div className={GRID_CLASSES}>
     {Array.from({ length: count }).map((_, i) => (
-      <div key={i} className="aspect-[2/3] rounded-lg bg-white/5 animate-pulse" />
+      <div key={i} className="aspect-[2/3] rounded-xl bg-white/5 animate-pulse" />
     ))}
   </div>
 );
@@ -181,9 +182,15 @@ function SearchPage() {
 
   const showInitialLoading = isLoading && items.length === 0;
   const showLoadingMore = isFetchingNextPage && items.length > 0;
+  const gridAnimationKey = isSearching ? debouncedQuery.trim().toLowerCase() : 'trending';
 
   return (
-    <div className="min-h-screen bg-black text-white px-4 sm:px-8 pt-6 sm:pt-10 pb-16">
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+      className="min-h-screen bg-black text-white px-4 sm:px-8 pt-6 sm:pt-10 pb-16"
+    >
       <SEO
         title={debouncedQuery ? `"${debouncedQuery}" - Search Results` : 'Search Movies & TV Shows'}
         description={
@@ -268,21 +275,31 @@ function SearchPage() {
 
         {items.length > 0 && (
           <div className={GRID_CLASSES}>
-            {items.map(item => (
-              <ContentCard
-                key={`${item.media_type || 'movie'}-${item.id}`}
-                title={item.title || item.name}
-                poster={item.poster_path ? `${CONFIG.IMAGE_BASE_URL}${item.poster_path}` : ''}
-                rating={item.vote_average}
-                releaseDate={item.release_date || item.first_air_date}
-                onClick={() => {
-                  const type = item.media_type === 'tv' ? 'tv' : 'movie';
-                  const from = debouncedQuery.trim()
-                    ? `/search?q=${encodeURIComponent(debouncedQuery.trim())}`
-                    : '/search';
-                  navigate(toDetailPath(type, item.id, item.title || item.name), { state: { from } });
+            {items.map((item, index) => (
+              <motion.div
+                key={`${gridAnimationKey}-${item.media_type || 'movie'}-${item.id}`}
+                initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{
+                  duration: 0.26,
+                  ease: 'easeOut',
+                  delay: Math.min(index, 14) * 0.018,
                 }}
-              />
+              >
+                <ContentCard
+                  title={item.title || item.name}
+                  poster={item.poster_path ? `${CONFIG.IMAGE_BASE_URL}${item.poster_path}` : ''}
+                  rating={item.vote_average}
+                  releaseDate={item.release_date || item.first_air_date}
+                  onClick={() => {
+                    const type = item.media_type === 'tv' ? 'tv' : 'movie';
+                    const from = debouncedQuery.trim()
+                      ? `/search?q=${encodeURIComponent(debouncedQuery.trim())}`
+                      : '/search';
+                    navigate(toDetailPath(type, item.id, item.title || item.name), { state: { from } });
+                  }}
+                />
+              </motion.div>
             ))}
           </div>
         )}
@@ -295,7 +312,7 @@ function SearchPage() {
           </div>
         )}
       </section>
-    </div>
+    </motion.div>
   );
 }
 

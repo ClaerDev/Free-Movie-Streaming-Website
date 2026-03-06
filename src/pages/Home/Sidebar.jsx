@@ -86,8 +86,8 @@ function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
               {isActive && (
                 <motion.span
                   layoutId="sidebar-nav-active-indicator"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-full bg-red-500"
-                  transition={{ type: 'spring', stiffness: 520, damping: 36 }}
+                  className="absolute left-0 inset-y-0 my-auto w-[3px] h-6 rounded-full bg-red-500"
+                  transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
                 />
               )}
               <Icon className={`text-[24px] shrink-0 transition-colors duration-200 ${isActive ? 'text-red-400' : ''}`} />
@@ -132,8 +132,8 @@ function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
                     {isActiveGenre && (
                       <motion.span
                         layoutId="sidebar-genre-active-indicator"
-                        className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-red-500"
-                        transition={{ type: 'spring', stiffness: 520, damping: 36 }}
+                        className="absolute left-0 inset-y-0 my-auto w-[3px] h-5 rounded-full bg-red-500"
+                        transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
                       />
                     )}
                     <span className={`

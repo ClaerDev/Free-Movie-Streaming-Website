@@ -73,7 +73,10 @@ export default function HeroBanner() {
   if (loading) {
     return (
       <div className="w-full h-[72vh] md:h-screen bg-[#0a0c12] flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-12 h-12 border-4 border-white/20 border-t-white/70 rounded-full animate-spin" />
+          <p className="text-[11px] uppercase tracking-[0.2em] text-gray-500 font-semibold">Loading Home</p>
+        </div>
       </div>
     );
   }

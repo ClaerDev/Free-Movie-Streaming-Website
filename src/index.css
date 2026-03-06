@@ -2,6 +2,28 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
+:root {
+  --motion-fast: 160ms;
+  --motion-base: 220ms;
+  --motion-slow: 300ms;
+  --motion-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.motion-fast {
+  transition-duration: var(--motion-fast);
+  transition-timing-function: var(--motion-ease-out);
+}
+
+.motion-base {
+  transition-duration: var(--motion-base);
+  transition-timing-function: var(--motion-ease-out);
+}
+
+.motion-slow {
+  transition-duration: var(--motion-slow);
+  transition-timing-function: var(--motion-ease-out);
+}
+
 
 body {
   background-color: black;

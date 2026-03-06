@@ -1,13 +1,14 @@
-import React, { useEffect, useState, useCallback, memo } from "react";
+import React, { useEffect, useState, useCallback, memo, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
-import { fetchMovieDetails } from "../Fetcher";
+import { fetchMovieDetails, fetchRelatedMovies } from "../Fetcher";
 import { getIdFromDetailSlug, toDetailPath } from "../urlUtils";
 import { FaRedo, FaStar, FaArrowLeft, FaFilm } from "react-icons/fa";
 import { BiCalendar, BiTime, BiGlobe } from "react-icons/bi";
 import Loadingspinner from "../resused/Loadingspinner";
 import VideoPlayer from "./VideoPlayer";
 import SEO from "../SEO";
+import ContentCard from "../ContentCard";
 
 const MemoizedVideoPlayer = memo(VideoPlayer);
 
@@ -54,6 +55,12 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
   const [error,        setError]        = useState(null);
   const [retrying,     setRetrying]     = useState(false);
   const [showOverview, setShowOverview] = useState(false);
+  const [related,      setRelated]      = useState([]);
+  const [isDraggingRelated, setIsDraggingRelated] = useState(false);
+
+  const relatedListRef = useRef(null);
+  const relatedDragStateRef = useRef({ active: false, startX: 0, startScrollLeft: 0, moved: false });
+  const suppressRelatedClickRef = useRef(false);
 
   const handleBack = () => {
     if (location.state?.from) {
@@ -68,8 +75,12 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
     setError(null);
     setRetrying(true);
     try {
-      const data = await fetchMovieDetails(movieId);
+      const [data, relatedData] = await Promise.all([
+        fetchMovieDetails(movieId),
+        fetchRelatedMovies(movieId),
+      ]);
       setMovie(data);
+      setRelated((relatedData ?? []).filter((item) => item?.id && item.id !== data.id).slice(0, 18));
     } catch {
       setError("Failed to load movie. Please try again.");
     } finally {
@@ -126,6 +137,53 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
   const truncated = overview.length > 280 && !showOverview
     ? overview.slice(0, 280) + "…"
     : overview;
+
+  const handleRelatedSelect = (item) => {
+    navigate(toDetailPath('movie', item.id, item.title || item.name), {
+      state: { from: location.pathname + location.search },
+    });
+  };
+
+  const onRelatedMouseDown = useCallback((e) => {
+    if (e.button !== 0) return;
+    const el = relatedListRef.current;
+    if (!el) return;
+    relatedDragStateRef.current = {
+      active: true,
+      startX: e.pageX,
+      startScrollLeft: el.scrollLeft,
+      moved: false,
+    };
+    setIsDraggingRelated(true);
+  }, []);
+
+  const onRelatedMouseMove = useCallback((e) => {
+    const el = relatedListRef.current;
+    const drag = relatedDragStateRef.current;
+    if (!el || !drag.active) return;
+
+    const delta = e.pageX - drag.startX;
+    if (Math.abs(delta) > 4) drag.moved = true;
+    el.scrollLeft = drag.startScrollLeft - delta;
+  }, []);
+
+  const endRelatedDrag = useCallback(() => {
+    const drag = relatedDragStateRef.current;
+    if (!drag.active) return;
+
+    drag.active = false;
+    suppressRelatedClickRef.current = drag.moved;
+    setIsDraggingRelated(false);
+
+    setTimeout(() => {
+      suppressRelatedClickRef.current = false;
+    }, 0);
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('mouseup', endRelatedDrag);
+    return () => window.removeEventListener('mouseup', endRelatedDrag);
+  }, [endRelatedDrag]);
 
   return (
     <div className="min-h-screen bg-[#0b0b0f] text-white">
@@ -310,6 +368,39 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
       </div>
 
       {/* ══════ PRODUCTION META ══════ */}
+      {related.length > 0 && (
+        <section className="px-3 sm:px-5 md:px-10 lg:px-16 pb-10">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg md:text-xl font-black tracking-tight">More Like This</h3>
+              <span className="text-[11px] uppercase tracking-[0.16em] text-gray-500 font-semibold">Recommended</span>
+            </div>
+            <div
+              ref={relatedListRef}
+              onMouseDown={onRelatedMouseDown}
+              onMouseMove={onRelatedMouseMove}
+              onMouseLeave={endRelatedDrag}
+              className={`grid grid-flow-col auto-cols-[155px] md:auto-cols-[170px] gap-3 overflow-x-auto hide-scrollbar pb-2 select-none ${isDraggingRelated ? 'cursor-grabbing' : 'cursor-grab'}`}
+            >
+              {related.map((item) => (
+                <div key={item.id} className="shrink-0">
+                  <ContentCard
+                    title={item.title || item.name}
+                    poster={item.poster_path ? `${POSTER}${item.poster_path}` : '/placeholder.svg'}
+                    rating={item.vote_average}
+                    releaseDate={item.release_date}
+                    onClick={() => {
+                      if (suppressRelatedClickRef.current) return;
+                      handleRelatedSelect(item);
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {(movie.production_companies?.length > 0 || movie.production_countries?.length > 0 || movie.status) && (
         <div className="px-3 sm:px-5 md:px-10 lg:px-16 pb-20">
           <div className="max-w-7xl mx-auto">

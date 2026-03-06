@@ -16,7 +16,31 @@ const ErrorWarning = () => (
   </div>
 );
 
-const ContentGrid = ({ genreId, type, onSelect, sortBy = 'popularity.desc' }) => {
+const EmptyState = ({ onReset }) => (
+  <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
+    <div className="w-14 h-14 rounded-2xl bg-white/[0.04] border border-white/[0.1] flex items-center justify-center text-xl">
+      <span className="text-gray-300">?</span>
+    </div>
+    <h3 className="text-white font-bold text-lg">No results found</h3>
+    <p className="text-gray-500 text-sm max-w-md">
+      This filter combination returned no titles. Try switching to Most Popular or clear filters.
+    </p>
+    {onReset && (
+      <button
+        onClick={onReset}
+        className="mt-1 inline-flex items-center rounded-full border border-white/[0.12] bg-white/[0.04] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-gray-300 hover:text-white hover:bg-white/[0.08] transition-colors motion-fast"
+      >
+        Reset Filters
+      </button>
+    )}
+  </div>
+);
+
+EmptyState.propTypes = {
+  onReset: PropTypes.func,
+};
+
+const ContentGrid = ({ genreId, type, onSelect, sortBy = 'popularity.desc', onReset }) => {
   // fetchParams is the single source of truth for what to fetch.
   // Keeping it in state ensures the fetch effect always sees fresh values —
   // the sync effect below updates it, causing a new render, and only then
@@ -202,6 +226,8 @@ const ContentGrid = ({ genreId, type, onSelect, sortBy = 'popularity.desc' }) =>
         {renderContent()}
       </div>
 
+      {!loading && !error && items.length === 0 && <EmptyState onReset={onReset} />}
+
       {/* Infinite-scroll spinner */}
       {items.length > 0 && loading && (
         <div className="flex items-center justify-center py-8">
@@ -219,6 +245,7 @@ ContentGrid.propTypes = {
   type: PropTypes.oneOf(['movie', 'tv']).isRequired,
   onSelect: PropTypes.func.isRequired,
   sortBy: PropTypes.string,
+  onReset: PropTypes.func,
 };
 
 export default ContentGrid;
