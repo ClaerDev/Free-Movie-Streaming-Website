@@ -13,7 +13,7 @@ import { fetchSeriesDetails, fetchAllEpisodes, fetchRelatedSeries } from "../Fet
 import { getIdFromDetailSlug, toDetailPath } from "../urlUtils";
 import { FaRedo, FaStar, FaArrowLeft, FaTv } from "react-icons/fa";
 import { BiCalendar, BiGlobe, BiTv, BiChevronLeft, BiChevronRight, BiSearch } from "react-icons/bi";
-import Loadingspinner from "../resused/Loadingspinner";
+import DetailPageSkeleton from "../resused/DetailPageSkeleton";
 import VideoPlayer from "./VideoPlayer";
 import SEO from "../SEO";
 import ContentCard from "../ContentCard";
@@ -118,11 +118,23 @@ const TvDetails = ({ tvId: tvIdProp }) => {
       setAllSeasons(filtered);
 
       if (filtered.length > 0) {
-        const first = filtered[0];
-        const firstEp = first.episodes?.find(e => e.episode_number)?.episode_number ?? 1;
-        setViewingSeason(first.season_number);
-        setPlayingSeason(first.season_number);
-        setPlayingEpisode(firstEp);
+        // Read URL params at fetch time so the correct season/episode is set as the
+        // initial state directly — prevents S1E1 flash before URL sync can override.
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlSeason = getValidParamNumber(urlParams, 'season');
+        const urlEpisode = getValidParamNumber(urlParams, 'episode');
+
+        const selectedSeason =
+          (urlSeason && filtered.find((s) => s.season_number === urlSeason))
+          ?? filtered[0];
+        const selectedEpisode =
+          (urlEpisode && selectedSeason.episodes?.find((e) => e.episode_number === urlEpisode)?.episode_number)
+          ?? selectedSeason.episodes?.find((e) => e.episode_number)?.episode_number
+          ?? 1;
+
+        setViewingSeason(selectedSeason.season_number);
+        setPlayingSeason(selectedSeason.season_number);
+        setPlayingEpisode(selectedEpisode);
       }
     } catch {
       setError("Failed to load TV show details. Please try again.");
@@ -316,9 +328,7 @@ const TvDetails = ({ tvId: tvIdProp }) => {
   }, [endRelatedDrag]);
 
   if (loading) return (
-    <div className="min-h-[60vh] flex items-center justify-center">
-      <Loadingspinner size="large" />
-    </div>
+    <DetailPageSkeleton type="tv" />
   );
 
   if (error) return (

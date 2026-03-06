@@ -51,6 +51,7 @@ const ContentGrid = ({ genreId, type, onSelect, sortBy = 'popularity.desc', onRe
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [refreshToken, setRefreshToken] = useState(0);
+  const [hasAttemptedFetch, setHasAttemptedFetch] = useState(false);
 
   const hasMoreRef   = useRef(true);
   const loadingRef   = useRef(false);
@@ -63,6 +64,7 @@ const ContentGrid = ({ genreId, type, onSelect, sortBy = 'popularity.desc', onRe
   // This fires in one render; the fetch effect fires in the NEXT render
   // after fetchParams state is committed — so no stale closure.
   useEffect(() => {
+    setHasAttemptedFetch(false);
     setFetchParams({ genreId, type, sortBy, page: 1 });
   }, [genreId, type, sortBy]);
 
@@ -127,6 +129,7 @@ const ContentGrid = ({ genreId, type, onSelect, sortBy = 'popularity.desc', onRe
       .finally(() => {
         if (signal.aborted) return;
         setLoading(false);
+        setHasAttemptedFetch(true);
         loadingRef.current = false;
       });
 
@@ -202,7 +205,7 @@ const ContentGrid = ({ genreId, type, onSelect, sortBy = 'popularity.desc', onRe
   return (
     <div className="px-2 sm:px-4 py-4">
       {/* Initial loading skeleton */}
-      {items.length === 0 && loading && (
+      {items.length === 0 && (loading || !hasAttemptedFetch) && (
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3 sm:gap-4">
           {Array.from({ length: 21 }).map((_, i) => (
             <div key={i} className="w-full aspect-[2/3] rounded-xl bg-white/5 animate-pulse" />
@@ -226,7 +229,7 @@ const ContentGrid = ({ genreId, type, onSelect, sortBy = 'popularity.desc', onRe
         {renderContent()}
       </div>
 
-      {!loading && !error && items.length === 0 && <EmptyState onReset={onReset} />}
+      {hasAttemptedFetch && !loading && !error && items.length === 0 && <EmptyState onReset={onReset} />}
 
       {/* Infinite-scroll spinner */}
       {items.length > 0 && loading && (

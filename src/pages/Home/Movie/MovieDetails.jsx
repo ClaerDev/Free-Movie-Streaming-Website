@@ -5,7 +5,7 @@ import { fetchMovieDetails, fetchRelatedMovies } from "../Fetcher";
 import { getIdFromDetailSlug, toDetailPath } from "../urlUtils";
 import { FaRedo, FaStar, FaArrowLeft, FaFilm } from "react-icons/fa";
 import { BiCalendar, BiTime, BiGlobe } from "react-icons/bi";
-import Loadingspinner from "../resused/Loadingspinner";
+import DetailPageSkeleton from "../resused/DetailPageSkeleton";
 import VideoPlayer from "./VideoPlayer";
 import SEO from "../SEO";
 import ContentCard from "../ContentCard";
@@ -156,9 +156,7 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
   };
 
   if (loading) return (
-    <div className="min-h-[60vh] flex items-center justify-center">
-      <Loadingspinner size="large" />
-    </div>
+    <DetailPageSkeleton type="movie" />
   );
 
   if (error) return (
