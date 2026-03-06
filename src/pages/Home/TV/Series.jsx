@@ -37,7 +37,11 @@ function Series() {
     GENRES.tv.find(g => g.id === genreId) ||
     SPECIAL_CATEGORIES.tv.find(g => g.id === genreId);
 
-  const handleSelect = (item) => navigate(toDetailPath('tv', item.id, item.title || item.name));
+  const handleSelect = (item) => {
+    navigate(toDetailPath('tv', item.id, item.title || item.name), {
+      state: { from: location.pathname + location.search },
+    });
+  };
 
   useEffect(() => {
     const cleanPath = buildBrowsePath('tv', genreId, sortBy);

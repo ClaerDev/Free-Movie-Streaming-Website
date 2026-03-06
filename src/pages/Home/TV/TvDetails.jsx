@@ -1,5 +1,6 @@
 import React, {
   useEffect,
+  useLayoutEffect,
   useState,
   useCallback,
   memo,
@@ -7,7 +8,7 @@ import React, {
 } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { fetchSeriesDetails, fetchAllEpisodes, fetchRelatedSeries } from "../Fetcher";
 import { getIdFromDetailSlug, toDetailPath } from "../urlUtils";
 import { FaRedo, FaStar, FaArrowLeft, FaTv } from "react-icons/fa";
@@ -72,6 +73,24 @@ const TvDetails = ({ tvId: tvIdProp }) => {
   const relatedDragStateRef = useRef({ active: false, startX: 0, startScrollLeft: 0, moved: false });
   const suppressRelatedClickRef = useRef(false);
 
+  // Prevent one-frame stale detail flash when navigating between related titles.
+  useLayoutEffect(() => {
+    setLoading(true);
+    setError(null);
+    setTv(null);
+    setAllSeasons([]);
+    setViewingSeason(null);
+    setPlayingSeason(null);
+    setPlayingEpisode(null);
+    setShowOverview(false);
+    setEpisodeQuery('');
+    setRelated([]);
+    setIsDraggingEpisodes(false);
+    setIsDraggingRelated(false);
+    suppressClickRef.current = false;
+    suppressRelatedClickRef.current = false;
+  }, [tvId]);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -112,7 +131,13 @@ const TvDetails = ({ tvId: tvIdProp }) => {
   }, [load]);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [tvId]);
+
+  useEffect(() => {
     if (!tv?.id) return;
+    const isLegacyRoute = location.pathname.startsWith('/tv/');
+    if (!isLegacyRoute) return;
     const canonicalPath = toDetailPath('tv', tv.id, tv.name);
     if (location.pathname !== canonicalPath) {
       navigate(canonicalPath, { replace: true, state: location.state });
@@ -121,7 +146,17 @@ const TvDetails = ({ tvId: tvIdProp }) => {
 
   useEffect(() => {
     if (activeEpisodeRef.current && episodeListRef.current && viewingSeason === playingSeason) {
-      activeEpisodeRef.current.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+      const container = episodeListRef.current;
+      const activeEl = activeEpisodeRef.current;
+      const containerRect = container.getBoundingClientRect();
+      const activeRect = activeEl.getBoundingClientRect();
+
+      const targetLeft =
+        container.scrollLeft +
+        (activeRect.left - containerRect.left) -
+        (containerRect.width / 2 - activeRect.width / 2);
+
+      container.scrollTo({ left: Math.max(0, targetLeft), behavior: "smooth" });
     }
   }, [viewingSeason, playingSeason, playingEpisode]);
 
@@ -261,7 +296,7 @@ const TvDetails = ({ tvId: tvIdProp }) => {
 
   const handleRelatedSelect = (item) => {
     navigate(toDetailPath('tv', item.id, item.name || item.title), {
-      state: { from: location.pathname + location.search },
+      state: { from: '/series' },
     });
   };
 
@@ -342,13 +377,24 @@ const TvDetails = ({ tvId: tvIdProp }) => {
           <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/[0.05] pointer-events-none z-10" />
           <div className="w-full aspect-video bg-black">
             {playingSeason !== null && playingEpisode !== null ? (
-              <MemoizedVideoPlayer
-                tvId={tvId}
-                season={playingSeason}
-                episode={playingEpisode}
-                title={tv.name}
-                key={`${tvId}-${playingSeason}-${playingEpisode}`}
-              />
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`player-${tvId}-${playingSeason}-${playingEpisode}`}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                  className="w-full h-full"
+                >
+                  <MemoizedVideoPlayer
+                    tvId={tvId}
+                    season={playingSeason}
+                    episode={playingEpisode}
+                    title={tv.name}
+                    key={`${tvId}-${playingSeason}-${playingEpisode}`}
+                  />
+                </motion.div>
+              </AnimatePresence>
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-600 text-sm">
                 Select an episode to start watching
@@ -412,12 +458,21 @@ const TvDetails = ({ tvId: tvIdProp }) => {
 
               {/* Now playing summary */}
               {activeEpisodeIndex >= 0 && sortedEpisodes[activeEpisodeIndex] && (
-                <div className="mb-4 rounded-xl border border-white/[0.1] bg-white/[0.03] px-3 py-2.5">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-gray-500 font-semibold">Now Playing</p>
-                  <p className="text-sm font-semibold text-white mt-0.5 line-clamp-1">
-                    S{String(playingSeason).padStart(2, '0')} · E{String(playingEpisode).padStart(2, '0')} — {sortedEpisodes[activeEpisodeIndex].name || `Episode ${playingEpisode}`}
-                  </p>
-                </div>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={`episode-summary-${playingSeason}-${playingEpisode}`}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                    className="mb-4 rounded-xl border border-white/[0.1] bg-white/[0.03] px-3 py-2.5"
+                  >
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-gray-500 font-semibold">Now Playing</p>
+                    <p className="text-sm font-semibold text-white mt-0.5 line-clamp-1">
+                      S{String(playingSeason).padStart(2, '0')} · E{String(playingEpisode).padStart(2, '0')} — {sortedEpisodes[activeEpisodeIndex].name || `Episode ${playingEpisode}`}
+                    </p>
+                  </motion.div>
+                </AnimatePresence>
               )}
 
               {/* Episode quick filter */}
@@ -437,7 +492,15 @@ const TvDetails = ({ tvId: tvIdProp }) => {
                 {allSeasons.map(season => (
                   <button
                     key={season.id ?? season.season_number}
-                    onClick={() => setViewingSeason(season.season_number)}
+                    onClick={() => {
+                      const defaultEpisode =
+                        season.episodes?.find((ep) => ep.episode_number === 1)?.episode_number
+                        ?? season.episodes?.[0]?.episode_number
+                        ?? 1;
+                      setViewingSeason(season.season_number);
+                      setPlayingSeason(season.season_number);
+                      setPlayingEpisode(defaultEpisode);
+                    }}
                     className={`
                       relative shrink-0 px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap overflow-hidden
                       border-2 transition-colors duration-150 focus:outline-none
