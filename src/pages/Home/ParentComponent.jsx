@@ -12,6 +12,15 @@ function ParentComponent() {
   const [showMobileNav, setShowMobileNav] = useState(true);
   const lastScrollYRef = useRef(0);
 
+  const activePage =
+    location.pathname === '/'                  ? 'home'
+    : location.pathname.startsWith('/movies')  ? 'movies'
+    : location.pathname.startsWith('/series')  ? 'series'
+    : location.pathname.startsWith('/search')  ? 'search'
+    : location.pathname.startsWith('/movie/')  ? 'movies'
+    : location.pathname.startsWith('/tv/')     ? 'series'
+    : 'home';
+
   const handleScroll = useCallback(() => {
     const currentY = window.scrollY;
     setScrollPosition(currentY);
@@ -36,15 +45,6 @@ function ParentComponent() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
-
-  const activePage =
-    location.pathname === '/'                  ? 'home'
-    : location.pathname.startsWith('/movies')  ? 'movies'
-    : location.pathname.startsWith('/series')  ? 'series'
-    : location.pathname.startsWith('/search')  ? 'search'
-    : location.pathname.startsWith('/movie/')  ? 'movies'
-    : location.pathname.startsWith('/tv/')     ? 'series'
-    : 'home';
 
   const selectedGenreId = (() => {
     const pathParts = location.pathname.split('/').filter(Boolean);
