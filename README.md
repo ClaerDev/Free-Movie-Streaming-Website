@@ -98,17 +98,14 @@ src/
     ├── Fetcher.js               # All TMDB API calls (trending, discover, details, episodes)
     ├── tmdb.js                  # Genre lists, special category definitions & params
     ├── urlUtils.js              # Slug helpers — toSlug(), toDetailPath()
-    ├── resused/
-    │   └── Loadingspinner.jsx   # Shared loading spinner component
     ├── Movie/
     │   ├── Movie.jsx            # Movies browse page (trending default, genre + sort filters)
     │   ├── MovieDetails.jsx     # Movie detail page — hero backdrop, player, production info
     │   ├── VideoPlayer.jsx      # Movie iframe player (vidlink.pro) with scroll overlay
-    │   ├── MovieInfo.jsx        # (legacy)
-    │   └── LoadingSpinner.jsx   # (legacy)
+    ├── Resused/
+    │   ├── DetailPageSkeleton.jsx # Movies browse page (trending default, genre + sort filters)
     └── TV/
         ├── Series.jsx           # TV Shows browse page (trending default, genre + sort filters)
         ├── TvDetails.jsx        # TV detail page — hero, player, season tabs, episode cards
-        ├── VideoPlayer.jsx      # TV iframe player (vidlink.pro) with scroll overlay
-        └── LoadingSpinner.jsx   # (legacy)
+        └── VideoPlayer.jsx      # TV iframe player (vidlink.pro) with scroll overlay
 ```
