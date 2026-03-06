@@ -189,7 +189,7 @@ function SearchPage() {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
-      className="min-h-screen bg-black text-white px-4 sm:px-8 pt-6 sm:pt-10 pb-16"
+      className="min-h-screen bg-black text-white px-4 sm:px-8 pt-6 sm:pt-10 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-16"
     >
       <SEO
         title={debouncedQuery ? `"${debouncedQuery}" - Search Results` : 'Search Movies & TV Shows'}
