@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toDetailPath } from './urlUtils';
 import HeroBanner from './HeroBanner';
@@ -15,10 +15,13 @@ const SectionDivider = ({ label }) => (
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSelect = (item, type) => {
     const mediaType = item.media_type ?? type;
-    navigate(toDetailPath(mediaType === 'tv' ? 'tv' : 'movie', item.id, item.title || item.name));
+    navigate(toDetailPath(mediaType === 'tv' ? 'tv' : 'movie', item.id, item.title || item.name), {
+      state: { from: location.pathname + location.search },
+    });
   };
 
   const goMovies = () => navigate('/movies');
