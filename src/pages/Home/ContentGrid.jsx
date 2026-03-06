@@ -52,7 +52,6 @@ const ContentGrid = ({ genreId, type, onSelect, sortBy = 'popularity.desc' }) =>
       loadingRef.current = false;
       seenIdsRef.current = new Set();
       hasMoreRef.current = true;
-      setItems([]);
       setError(null);
     }
 
@@ -160,6 +159,8 @@ const ContentGrid = ({ genreId, type, onSelect, sortBy = 'popularity.desc' }) =>
     });
   };
 
+  const isRefreshing = loading && fetchParams.page === 1 && items.length > 0;
+
   return (
     <div className="px-2 sm:px-4 py-4">
       {/* Initial loading skeleton */}
@@ -168,6 +169,18 @@ const ContentGrid = ({ genreId, type, onSelect, sortBy = 'popularity.desc' }) =>
           {Array.from({ length: 21 }).map((_, i) => (
             <div key={i} className="w-full aspect-[2/3] rounded-xl bg-white/5 animate-pulse" />
           ))}
+        </div>
+      )}
+
+      {/* Soft refresh indicator when switching tabs/genres/sorts */}
+      {isRefreshing && (
+        <div className="mb-3 flex items-center justify-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.1] bg-white/[0.03] px-3 py-1.5">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
+            <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-400">
+              Updating
+            </span>
+          </div>
         </div>
       )}
 

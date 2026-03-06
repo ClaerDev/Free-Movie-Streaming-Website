@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { BiChevronLeft, BiChevronRight } from 'react-icons/bi';
 import { FiArrowRight } from 'react-icons/fi';
 import ContentCard from './ContentCard';
@@ -134,12 +134,57 @@ export default function TrendingRow({
 }) {
   const { items, loading } = useRow(type, variant, minRating, minVotes, originalLanguage, sinceYear);
   const rowRef = useRef(null);
+  const dragStateRef = useRef({ active: false, startX: 0, startScrollLeft: 0, moved: false });
+  const suppressClickRef = useRef(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   const scroll = (dir) => {
     const el = rowRef.current;
     if (!el) return;
     el.scrollBy({ left: dir * 580, behavior: 'smooth' });
   };
+
+  const onRowMouseDown = useCallback((e) => {
+    if (e.button !== 0) return;
+    const el = rowRef.current;
+    if (!el) return;
+
+    dragStateRef.current = {
+      active: true,
+      startX: e.pageX,
+      startScrollLeft: el.scrollLeft,
+      moved: false,
+    };
+    setIsDragging(true);
+  }, []);
+
+  const onRowMouseMove = useCallback((e) => {
+    const el = rowRef.current;
+    const drag = dragStateRef.current;
+    if (!el || !drag.active) return;
+
+    const delta = e.pageX - drag.startX;
+    if (Math.abs(delta) > 4) drag.moved = true;
+    el.scrollLeft = drag.startScrollLeft - delta;
+  }, []);
+
+  const endRowDrag = useCallback(() => {
+    const drag = dragStateRef.current;
+    if (!drag.active) return;
+
+    drag.active = false;
+    suppressClickRef.current = drag.moved;
+    setIsDragging(false);
+
+    setTimeout(() => {
+      suppressClickRef.current = false;
+    }, 0);
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('mouseup', endRowDrag);
+    return () => window.removeEventListener('mouseup', endRowDrag);
+  }, [endRowDrag]);
 
   if (loading) {
     return (
@@ -198,7 +243,10 @@ export default function TrendingRow({
       {/* ── Card row ── */}
       <div
         ref={rowRef}
-        className="flex gap-3 overflow-x-auto hide-scrollbar px-4 sm:px-6 pb-2"
+        onMouseDown={onRowMouseDown}
+        onMouseMove={onRowMouseMove}
+        onMouseLeave={endRowDrag}
+        className={`flex gap-3 overflow-x-auto hide-scrollbar px-4 sm:px-6 pb-2 select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
       >
         {items.map((item, index) => {
           const releaseDate = item.release_date || item.first_air_date || '';
@@ -230,7 +278,10 @@ export default function TrendingRow({
                 poster={item.poster_path ? `${POSTER}${item.poster_path}` : null}
                 rating={item.vote_average}
                 releaseDate={releaseDate.slice(0, 4)}
-                onClick={() => onSelect(item, mediaType)}
+                onClick={() => {
+                  if (suppressClickRef.current) return;
+                  onSelect(item, mediaType);
+                }}
               />
             </div>
           );

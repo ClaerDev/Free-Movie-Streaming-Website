@@ -57,6 +57,7 @@ const TvDetails = ({ tvId: tvIdProp }) => {
   const [playingEpisode, setPlayingEpisode] = useState(null);
   const [showOverview,   setShowOverview]   = useState(false);
   const [episodeQuery,   setEpisodeQuery]   = useState('');
+  const [isDraggingEpisodes, setIsDraggingEpisodes] = useState(false);
 
   const handleBack = () => {
     if (location.state?.from) {
@@ -68,6 +69,8 @@ const TvDetails = ({ tvId: tvIdProp }) => {
 
   const activeEpisodeRef = useRef(null);
   const episodeListRef   = useRef(null);
+  const dragStateRef     = useRef({ active: false, startX: 0, startScrollLeft: 0, moved: false });
+  const suppressClickRef = useRef(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -120,6 +123,68 @@ const TvDetails = ({ tvId: tvIdProp }) => {
     }
   }, [viewingSeason, playingSeason, playingEpisode]);
 
+  const currentSeasonData = allSeasons.find(s => s.season_number === viewingSeason);
+  const sortedEpisodes = [...(currentSeasonData?.episodes ?? [])].sort((a, b) => a.episode_number - b.episode_number);
+  const filteredEpisodes = sortedEpisodes.filter((ep) => {
+    const q = episodeQuery.trim().toLowerCase();
+    if (!q) return true;
+    const title = (ep.name || '').toLowerCase();
+    return title.includes(q) || String(ep.episode_number).includes(q);
+  });
+
+  const activeEpisodeIndex = sortedEpisodes.findIndex((ep) => (
+    ep.episode_number === playingEpisode && currentSeasonData?.season_number === playingSeason
+  ));
+
+  const jumpEpisode = (direction) => {
+    if (!sortedEpisodes.length || activeEpisodeIndex < 0 || !currentSeasonData) return;
+    const nextIndex = activeEpisodeIndex + direction;
+    if (nextIndex < 0 || nextIndex >= sortedEpisodes.length) return;
+    const nextEpisode = sortedEpisodes[nextIndex];
+    setPlayingSeason(currentSeasonData.season_number);
+    setPlayingEpisode(nextEpisode.episode_number);
+  };
+
+  const onEpisodeMouseDown = useCallback((e) => {
+    const el = episodeListRef.current;
+    if (!el) return;
+    dragStateRef.current = {
+      active: true,
+      startX: e.pageX,
+      startScrollLeft: el.scrollLeft,
+      moved: false,
+    };
+    setIsDraggingEpisodes(true);
+  }, []);
+
+  const onEpisodeMouseMove = useCallback((e) => {
+    const el = episodeListRef.current;
+    const drag = dragStateRef.current;
+    if (!el || !drag.active) return;
+
+    const delta = e.pageX - drag.startX;
+    if (Math.abs(delta) > 4) drag.moved = true;
+    el.scrollLeft = drag.startScrollLeft - delta;
+  }, []);
+
+  const endEpisodeDrag = useCallback(() => {
+    const drag = dragStateRef.current;
+    if (!drag.active) return;
+    drag.active = false;
+    suppressClickRef.current = drag.moved;
+    setIsDraggingEpisodes(false);
+
+    // Clear click suppression after the current event loop.
+    setTimeout(() => {
+      suppressClickRef.current = false;
+    }, 0);
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('mouseup', endEpisodeDrag);
+    return () => window.removeEventListener('mouseup', endEpisodeDrag);
+  }, [endEpisodeDrag]);
+
   if (loading) return (
     <div className="min-h-[60vh] flex items-center justify-center">
       <Loadingspinner size="large" />
@@ -151,28 +216,6 @@ const TvDetails = ({ tvId: tvIdProp }) => {
   const truncated = overview.length > 240 && !showOverview
     ? overview.slice(0, 240) + "…"
     : overview;
-
-  const currentSeasonData = allSeasons.find(s => s.season_number === viewingSeason);
-  const sortedEpisodes = [...(currentSeasonData?.episodes ?? [])].sort((a, b) => a.episode_number - b.episode_number);
-  const filteredEpisodes = sortedEpisodes.filter((ep) => {
-    const q = episodeQuery.trim().toLowerCase();
-    if (!q) return true;
-    const title = (ep.name || '').toLowerCase();
-    return title.includes(q) || String(ep.episode_number).includes(q);
-  });
-
-  const activeEpisodeIndex = sortedEpisodes.findIndex((ep) => (
-    ep.episode_number === playingEpisode && currentSeasonData?.season_number === playingSeason
-  ));
-
-  const jumpEpisode = (direction) => {
-    if (!sortedEpisodes.length || activeEpisodeIndex < 0) return;
-    const nextIndex = activeEpisodeIndex + direction;
-    if (nextIndex < 0 || nextIndex >= sortedEpisodes.length) return;
-    const nextEpisode = sortedEpisodes[nextIndex];
-    setPlayingSeason(currentSeasonData.season_number);
-    setPlayingEpisode(nextEpisode.episode_number);
-  };
 
   return (
     <div className="min-h-screen bg-[#0b0b0f] text-white">      <SEO
@@ -349,10 +392,10 @@ const TvDetails = ({ tvId: tvIdProp }) => {
                     onClick={() => setViewingSeason(season.season_number)}
                     className={`
                       relative shrink-0 px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap
-                      transition-all duration-150 focus:outline-none
+                      border-2 transition-colors duration-150 focus:outline-none
                       ${viewingSeason === season.season_number
-                        ? "bg-red-600 text-white shadow-[0_0_18px_rgba(220,38,38,0.35)]"
-                        : "bg-white/[0.04] border border-white/[0.08] text-gray-300 hover:text-white"
+                        ? "border-red-500 bg-red-600 text-white shadow-[0_0_18px_rgba(220,38,38,0.35)]"
+                        : "border-transparent bg-white/[0.04] text-gray-300 hover:text-white"
                       }
                     `}
                   >
@@ -368,7 +411,10 @@ const TvDetails = ({ tvId: tvIdProp }) => {
               {filteredEpisodes.length > 0 ? (
                 <div
                   ref={episodeListRef}
-                  className="grid grid-flow-col auto-cols-[190px] sm:auto-cols-[220px] gap-3 overflow-x-auto hide-scrollbar pb-2 px-1"
+                  onMouseDown={onEpisodeMouseDown}
+                  onMouseMove={onEpisodeMouseMove}
+                  onMouseLeave={endEpisodeDrag}
+                  className={`grid grid-flow-col auto-cols-[190px] sm:auto-cols-[220px] gap-3 overflow-x-auto hide-scrollbar pb-2 px-1 select-none ${isDraggingEpisodes ? 'cursor-grabbing' : 'cursor-grab'}`}
                 >
                   {filteredEpisodes.map(ep => {
                     const isPlaying = playingSeason === viewingSeason && playingEpisode === ep.episode_number;
@@ -377,15 +423,16 @@ const TvDetails = ({ tvId: tvIdProp }) => {
                         ref={isPlaying ? activeEpisodeRef : null}
                         key={ep.id ?? ep.episode_number}
                         onClick={() => {
+                          if (suppressClickRef.current) return;
                           setPlayingSeason(currentSeasonData.season_number);
                           setPlayingEpisode(ep.episode_number);
                         }}
                         className={`
                           group relative flex flex-col rounded-xl overflow-hidden text-left
-                          transition-all duration-200 focus:outline-none shrink-0
+                          border-2 focus:outline-none shrink-0
                           ${isPlaying
-                            ? "border-2 border-red-500 bg-white/[0.03] shadow-[0_10px_24px_rgba(0,0,0,0.35)]"
-                            : "border border-white/[0.08] bg-white/[0.03] hover:border-white/[0.22]"
+                            ? "border-red-500 bg-white/[0.03] shadow-[0_10px_24px_rgba(0,0,0,0.35)]"
+                            : "border-white/[0.08] bg-white/[0.03] hover:border-white/[0.22]"
                           }
                         `}
                         aria-pressed={isPlaying}
@@ -396,6 +443,7 @@ const TvDetails = ({ tvId: tvIdProp }) => {
                               src={`${STILL}${ep.still_path}`}
                               alt=""
                               className="w-full h-full object-cover"
+                              draggable={false}
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">

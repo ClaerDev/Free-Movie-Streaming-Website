@@ -74,10 +74,10 @@ function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
               className={`
                 relative flex items-center gap-4 px-4 py-3.5 rounded-2xl
                 w-full text-[14px] font-medium whitespace-nowrap
-                transition-all duration-200 focus:outline-none
+                border-2 transition-colors duration-200 focus:outline-none
                 ${isActive
-                  ? 'bg-red-500/15 text-white ring-1 ring-red-500/35 shadow-sm shadow-red-950/30'
-                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  ? 'border-red-500/35 bg-red-500/15 text-white shadow-sm shadow-red-950/30'
+                  : 'border-transparent text-gray-400 hover:text-white hover:bg-white/5 hover:border-transparent'
                 }
               `}
             >
@@ -117,10 +117,10 @@ function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
                     className={`
                       relative flex items-center gap-4 px-4 py-2.5 rounded-2xl
                       w-full text-[13px] font-medium whitespace-nowrap
-                      transition-all duration-200 focus:outline-none text-left
+                      border-2 transition-colors duration-200 focus:outline-none text-left
                       ${isActiveGenre
-                        ? 'bg-red-500/15 text-white ring-1 ring-red-500/30'
-                        : 'text-gray-500 hover:text-gray-200 hover:bg-white/5'
+                        ? 'border-red-500/30 bg-red-500/15 text-white'
+                        : 'border-transparent text-gray-500 hover:text-gray-200 hover:bg-white/5 hover:border-transparent'
                       }
                     `}
                   >

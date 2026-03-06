@@ -29,7 +29,7 @@ const ContentCard = memo(({
 
   return (
     <motion.div
-      whileHover={{ scale: 1.04, y: -4 }}
+      whileHover={{ scale: 1.07, y: -2 }}
       whileTap={{ scale: 0.97 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
       className={`group relative w-full cursor-pointer rounded-xl overflow-hidden shadow-lg
