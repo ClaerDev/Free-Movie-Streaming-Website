@@ -7,7 +7,7 @@ const ContentCard = memo(({
   title,
   poster,
   rating,
-  onClick = () => {},
+  onClick = () => { },
   className = '',
   placeholderImage = '/placeholder.svg',
   releaseDate,
@@ -32,7 +32,7 @@ const ContentCard = memo(({
       whileHover={{ scale: 1.07, y: -2 }}
       whileTap={{ scale: 0.97 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
-      className={`group relative w-full cursor-pointer rounded-xl overflow-hidden shadow-lg
+      className={`group relative w-full cursor-pointer rounded-xl overflow-hidden
         ring-1 ring-white/5 hover:ring-white/20 hover:shadow-2xl hover:shadow-black/60
         transition-shadow duration-200 ${className}`}
       onClick={onClick}
@@ -51,9 +51,8 @@ const ContentCard = memo(({
         <img
           src={src}
           alt={title}
-          className={`w-full h-full object-cover transition-opacity duration-400 ${
-            imageLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
+          className={`w-full h-full object-cover transition-opacity duration-400 ${imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
           onLoad={() => setImageLoaded(true)}
           onError={() => { setImageError(true); setImageLoaded(true); }}
         />

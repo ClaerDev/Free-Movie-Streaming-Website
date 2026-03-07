@@ -53,11 +53,11 @@ const ContentGrid = ({ genreId, type, onSelect, sortBy = 'popularity.desc', onRe
   const [refreshToken, setRefreshToken] = useState(0);
   const [hasAttemptedFetch, setHasAttemptedFetch] = useState(false);
 
-  const hasMoreRef   = useRef(true);
-  const loadingRef   = useRef(false);
-  const seenIdsRef   = useRef(new Set());
-  const abortRef     = useRef(null);
-  const observerRef  = useRef(null);
+  const hasMoreRef = useRef(true);
+  const loadingRef = useRef(false);
+  const seenIdsRef = useRef(new Set());
+  const abortRef = useRef(null);
+  const observerRef = useRef(null);
   const lastElementRef = useRef(null);
 
   // When genre/type/sort props change, reset fetchParams to page 1.
@@ -225,7 +225,10 @@ const ContentGrid = ({ genreId, type, onSelect, sortBy = 'popularity.desc', onRe
         </div>
       )}
 
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3 sm:gap-4">
+      <div
+        className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3 sm:gap-4 overflow-visible"
+        style={{ paddingTop: 24, paddingBottom: 24, marginTop: -24, marginBottom: -24 }}
+      >
         {renderContent()}
       </div>
 

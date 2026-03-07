@@ -10,18 +10,18 @@ import { FaPlay } from 'react-icons/fa';
 import { GENRES, SPECIAL_CATEGORIES } from './tmdb';
 
 const NAV_ITEMS = [
-  { id: 'search',  icon: BiSearch,    action: 'navigate', label: 'Search'   },
-  { id: 'home',    icon: BiHomeAlt,   action: 'navigate', label: 'Home'     },
-  { id: 'movies',  icon: BiMoviePlay, action: 'navigate', label: 'Movies'   },
-  { id: 'series',  icon: BiTv,        action: 'navigate', label: 'TV Shows' },
+  { id: 'search', icon: BiSearch, action: 'navigate', label: 'Search' },
+  { id: 'home', icon: BiHomeAlt, action: 'navigate', label: 'Home' },
+  { id: 'movies', icon: BiMoviePlay, action: 'navigate', label: 'Movies' },
+  { id: 'series', icon: BiTv, action: 'navigate', label: 'TV Shows' },
 ];
 
 function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
   const activeId =
-    activePage === 'search'  ? 'search'
-    : activePage === 'movies'  ? 'movies'
-    : activePage === 'series'  ? 'series'
-    : 'home';
+    activePage === 'search' ? 'search'
+      : activePage === 'movies' ? 'movies'
+        : activePage === 'series' ? 'series'
+          : 'home';
 
   const showCategories = activePage === 'movies' || activePage === 'series';
   const genreType = activePage === 'movies' ? 'movie' : 'tv';
@@ -81,12 +81,6 @@ function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
                 }
               `}
             >
-              {/* Active left-bar indicator */}
-              {isActive && (
-                <span
-                  className="absolute left-0 inset-y-0 my-auto w-[3px] h-6 rounded-full bg-red-500"
-                />
-              )}
               <Icon className={`text-[24px] shrink-0 transition-colors duration-200 ${isActive ? 'text-red-400' : ''}`} />
               <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-75">
                 {label}
@@ -126,11 +120,6 @@ function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
                       }
                     `}
                   >
-                    {isActiveGenre && (
-                      <span
-                        className="absolute left-0 inset-y-0 my-auto w-[3px] h-5 rounded-full bg-red-500"
-                      />
-                    )}
                     <span className={`
                       w-2 h-2 rounded-full shrink-0 transition-all duration-200
                       ${isActiveGenre ? 'bg-red-400' : 'bg-gray-700'}
@@ -153,10 +142,10 @@ function Sidebar({ activePage, onNavigate, selectedGenreId, onGenreSelect }) {
 }
 
 Sidebar.propTypes = {
-  activePage:     PropTypes.string.isRequired,
-  onNavigate:     PropTypes.func.isRequired,
+  activePage: PropTypes.string.isRequired,
+  onNavigate: PropTypes.func.isRequired,
   selectedGenreId: PropTypes.number,
-  onGenreSelect:  PropTypes.func,
+  onGenreSelect: PropTypes.func,
 };
 
 export default React.memo(Sidebar);

@@ -3,17 +3,17 @@ import { BiChevronLeft, BiChevronRight } from 'react-icons/bi';
 import { FiArrowRight } from 'react-icons/fi';
 import ContentCard from './ContentCard';
 
-const API_KEY  = import.meta.env.VITE_TMDB_API;
+const API_KEY = import.meta.env.VITE_TMDB_API;
 const BASE_URL = import.meta.env.VITE_BASE_URL;
-const POSTER   = 'https://image.tmdb.org/t/p/w500';
+const POSTER = 'https://image.tmdb.org/t/p/w500';
 
 /* variant → TMDB endpoint path */
 const endpointFor = (type, variant) => {
-  if (variant === 'popular')      return `/${type}/popular`;
-  if (variant === 'top_rated')    return `/${type}/top_rated`;
-  if (variant === 'now_playing')  return '/movie/now_playing';
+  if (variant === 'popular') return `/${type}/popular`;
+  if (variant === 'top_rated') return `/${type}/top_rated`;
+  if (variant === 'now_playing') return '/movie/now_playing';
   if (variant === 'airing_today') return '/tv/airing_today';
-  if (variant === 'on_the_air')   return '/tv/on_the_air';
+  if (variant === 'on_the_air') return '/tv/on_the_air';
   return `/trending/${type}/week`; /* default: trending */
 };
 
@@ -26,7 +26,7 @@ const buildDiscoverUrl = (type, variant, langs, minRating, minVotes, sinceYear) 
   url.searchParams.append('sort_by', 'popularity.desc');
   url.searchParams.append('include_adult', 'false');
   if (minRating > 0) url.searchParams.append('vote_average.gte', minRating);
-  if (minVotes  > 0) url.searchParams.append('vote_count.gte', minVotes);
+  if (minVotes > 0) url.searchParams.append('vote_count.gte', minVotes);
   if (sinceYear > 0) {
     const dateKey = type === 'tv' ? 'first_air_date.gte' : 'primary_release_date.gte';
     url.searchParams.append(dateKey, `${sinceYear}-01-01`);
@@ -46,7 +46,7 @@ const buildDiscoverUrl = (type, variant, langs, minRating, minVotes, sinceYear) 
 };
 
 function useRow(type, variant = 'trending', minRating = 0, minVotes = 0, originalLanguage = null, sinceYear = 0) {
-  const [items, setItems]     = useState([]);
+  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // normalise to array for multi-language support
@@ -87,7 +87,7 @@ function useRow(type, variant = 'trending', minRating = 0, minVotes = 0, origina
           url.searchParams.append('api_key', API_KEY);
           url.searchParams.append('language', 'en-US');
           if (langs) url.searchParams.append('with_original_language', langs[0]);
-          const res  = await fetch(url);
+          const res = await fetch(url);
           const data = await res.json();
           results = data.results ?? [];
         }
@@ -103,7 +103,7 @@ function useRow(type, variant = 'trending', minRating = 0, minVotes = 0, origina
                 seen.add(i.id);
                 return (
                   (minRating === 0 || i.vote_average >= minRating) &&
-                  (minVotes  === 0 || i.vote_count   >= minVotes)
+                  (minVotes === 0 || i.vote_count >= minVotes)
                 );
               })
               .slice(0, 20)
@@ -113,7 +113,7 @@ function useRow(type, variant = 'trending', minRating = 0, minVotes = 0, origina
       finally { if (!cancelled) setLoading(false); }
     })();
     return () => { cancelled = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type, variant, minRating, minVotes, sinceYear, langsKey]);
 
   return { items, loading };
@@ -122,11 +122,11 @@ function useRow(type, variant = 'trending', minRating = 0, minVotes = 0, origina
 export default function TrendingRow({
   title,
   type,
-  variant          = 'trending',
-  showRank         = false,
-  minRating        = 0,
-  minVotes         = 0,
-  sinceYear        = 0,
+  variant = 'trending',
+  showRank = false,
+  minRating = 0,
+  minVotes = 0,
+  sinceYear = 0,
   originalLanguage = null,
   onSelect,
   onSeeAll,
@@ -204,7 +204,7 @@ export default function TrendingRow({
   if (!items.length) return null;
 
   return (
-    <section className="mb-12 group/row">
+    <section className="mb-12 group/row" style={{ overflow: 'visible' }}>
       {/* ── Section header ── */}
       <div className="flex items-center justify-between px-4 sm:px-6 mb-5">
         <div className="flex items-center gap-3">
@@ -246,11 +246,12 @@ export default function TrendingRow({
         onMouseDown={onRowMouseDown}
         onMouseMove={onRowMouseMove}
         onMouseLeave={endRowDrag}
-        className={`flex gap-3 overflow-x-auto hide-scrollbar px-4 sm:px-6 pb-2 select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+        className={`flex gap-3 overflow-x-auto hide-scrollbar px-4 sm:px-6 select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+        style={{ paddingTop: 24, paddingBottom: 24, marginTop: -16, marginBottom: -16 }}
       >
         {items.map((item, index) => {
           const releaseDate = item.release_date || item.first_air_date || '';
-          const mediaType   = item.media_type ?? type;
+          const mediaType = item.media_type ?? type;
           return (
             <div
               key={item.id}
