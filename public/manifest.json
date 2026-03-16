@@ -1,0 +1,17 @@
+{
+  "name": "WeFlix",
+  "short_name": "WeFlix",
+  "description": "Stream Movies & TV Shows Free",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/weflix.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
