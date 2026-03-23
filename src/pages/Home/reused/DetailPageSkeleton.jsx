@@ -59,15 +59,6 @@ const DetailPageSkeleton = ({ type = "movie" }) => {
       {/* ── PLAYER SECTION ── */}
       <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 md:px-12 -mt-4 md:-mt-10 mb-12">
         <div className="bg-[#0f1117]/80 rounded-2xl md:rounded-[2rem] p-2 md:p-5 border border-white/5">
-          {/* Header */}
-          <div className="flex items-center gap-3 mb-4 px-3 pt-2">
-            <div className={`w-10 h-10 rounded-full ${pulse} shrink-0`} />
-            <div className="flex flex-col gap-2">
-              <div className={`h-3 w-20 rounded-sm ${pulse}`} />
-              <div className={`h-4 w-32 rounded-sm ${pulse}`} />
-            </div>
-          </div>
-          
           {/* Frame */}
           <div className={`w-full aspect-video rounded-xl md:rounded-2xl ${pulse}`} />
         </div>

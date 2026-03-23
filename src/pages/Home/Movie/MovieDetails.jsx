@@ -302,15 +302,7 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
         
         {/* Video Player Container */}
         <div className="bg-[#0f1117]/80 backdrop-blur-xl border border-white/5 rounded-2xl md:rounded-[2rem] p-2 md:p-5 shadow-2xl mb-6 ring-1 ring-white/5">
-          <div className="flex items-center gap-3 mb-4 px-3 pt-2">
-             <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center shrink-0 border border-red-500/30">
-               <FaFilm className="text-red-400 text-sm" />
-             </div>
-             <div>
-               <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-red-500/80 mb-0.5">Stream Now</p>
-               <h2 className="text-sm md:text-base font-semibold text-white/90 truncate">{movie.title}</h2>
-             </div>
-          </div>
+
           
           <div className="w-full aspect-video rounded-xl md:rounded-2xl overflow-hidden bg-black ring-1 ring-white/10 shadow-[0_0_40px_rgba(0,0,0,0.5)] relative">
             <MemoizedVideoPlayer key={movieId} movieId={movieId} title={movie.title} />
