@@ -550,24 +550,13 @@ const TvDetails = ({ tvId: tvIdProp }) => {
           
           <div className="w-full aspect-video rounded-xl md:rounded-2xl overflow-hidden bg-black ring-1 ring-white/10 shadow-[0_0_40px_rgba(0,0,0,0.5)] relative">
             {playingSeason !== null && playingEpisode !== null ? (
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={`player-${tvId}-${playingSeason}-${playingEpisode}`}
-                  initial={{ opacity: 0, scale: 0.98 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="w-full h-full"
-                >
-                  <MemoizedVideoPlayer
-                    tvId={tvId}
-                    season={playingSeason}
-                    episode={playingEpisode}
-                    title={tv.name}
-                    key={`${tvId}-${playingSeason}-${playingEpisode}`}
-                  />
-                </motion.div>
-              </AnimatePresence>
+              <MemoizedVideoPlayer
+                tvId={tvId}
+                season={playingSeason}
+                episode={playingEpisode}
+                title={tv.name}
+                key={`${tvId}-${playingSeason}-${playingEpisode}`}
+              />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-400 font-medium">
                 Select an episode to start watching
@@ -804,7 +793,7 @@ const TvDetails = ({ tvId: tvIdProp }) => {
               onMouseDown={onRelatedMouseDown}
               onMouseMove={onRelatedMouseMove}
               onMouseLeave={endRelatedDrag}
-              className={`grid grid-flow-col auto-cols-[140px] md:auto-cols-[180px] gap-4 md:gap-5 overflow-x-auto hide-scrollbar pb-6 select-none ${isDraggingRelated ? 'cursor-grabbing' : 'cursor-grab'}`}
+              className={`grid grid-flow-col auto-cols-[140px] md:auto-cols-[180px] gap-4 md:gap-5 overflow-x-auto hide-scrollbar px-4 pt-6 pb-6 -mx-4 -mt-6 select-none ${isDraggingRelated ? 'cursor-grabbing' : 'cursor-grab'}`}
             >
               {related.map((item) => (
                 <div key={item.id} className="shrink-0 transition-transform duration-300 hover:-translate-y-2">

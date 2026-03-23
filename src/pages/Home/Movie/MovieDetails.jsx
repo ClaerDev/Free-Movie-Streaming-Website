@@ -313,7 +313,7 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
           </div>
           
           <div className="w-full aspect-video rounded-xl md:rounded-2xl overflow-hidden bg-black ring-1 ring-white/10 shadow-[0_0_40px_rgba(0,0,0,0.5)] relative">
-            <MemoizedVideoPlayer movieId={movieId} title={movie.title} />
+            <MemoizedVideoPlayer key={movieId} movieId={movieId} title={movie.title} />
           </div>
         </div>
 
@@ -349,7 +349,7 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
               onMouseDown={onRelatedMouseDown}
               onMouseMove={onRelatedMouseMove}
               onMouseLeave={endRelatedDrag}
-              className={`grid grid-flow-col auto-cols-[140px] md:auto-cols-[180px] gap-4 md:gap-5 overflow-x-auto hide-scrollbar pb-6 select-none ${isDraggingRelated ? 'cursor-grabbing' : 'cursor-grab'}`}
+              className={`grid grid-flow-col auto-cols-[140px] md:auto-cols-[180px] gap-4 md:gap-5 overflow-x-auto hide-scrollbar px-4 pt-6 pb-6 -mx-4 -mt-6 select-none ${isDraggingRelated ? 'cursor-grabbing' : 'cursor-grab'}`}
             >
               {related.map((item) => (
                 <div key={item.id} className="shrink-0 transition-transform duration-300 hover:-translate-y-2">

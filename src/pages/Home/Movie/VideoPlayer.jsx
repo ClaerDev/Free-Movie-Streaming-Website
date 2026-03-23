@@ -1,11 +1,7 @@
-import { useState, useEffect, memo } from 'react';
+import { memo } from 'react';
 import PropTypes from 'prop-types';
 
 const VideoPlayer = ({ movieId }) => {
-    const [active, setActive] = useState(false);
-
-    useEffect(() => { setActive(false); }, [movieId]);
-
     if (!movieId) return null;
 
     const iframeSrc = `https://vidlink.pro/movie/${movieId}?primaryColor=c45454&secondaryColor=a2a2a2&iconColor=eefdec&poster=true&title=true&nextbutton=false&player=jw`;
@@ -19,7 +15,6 @@ const VideoPlayer = ({ movieId }) => {
                 webkitallowfullscreen="true"
                 mozallowfullscreen="true"
                 title="Movie Stream"
-                loading="lazy"
                 referrerPolicy="no-referrer"
                 className="absolute inset-0 w-full h-full border-0"
                 style={{ userSelect: 'none' }}
