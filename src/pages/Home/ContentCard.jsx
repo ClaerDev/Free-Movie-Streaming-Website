@@ -32,7 +32,11 @@ const ContentCard = memo(({
   const handleWatchlist = useCallback(async (e) => {
     e.stopPropagation();
     if (!user) {
-      onNeedAuth?.();
+      if (onNeedAuth) {
+        onNeedAuth();
+      } else {
+        window.dispatchEvent(new Event('openAuthModal'));
+      }
       return;
     }
     if (!mediaId) return;

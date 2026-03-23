@@ -23,6 +23,12 @@ function ParentComponent() {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    const handleOpenAuthModal = () => setIsAuthModalOpen(true);
+    window.addEventListener('openAuthModal', handleOpenAuthModal);
+    return () => window.removeEventListener('openAuthModal', handleOpenAuthModal);
+  }, []);
+
   const handleLogout = async () => {
     try {
       await signOut(auth);
