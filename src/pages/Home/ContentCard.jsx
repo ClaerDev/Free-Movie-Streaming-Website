@@ -29,9 +29,9 @@ const ContentCard = memo(({
 
   return (
     <motion.div
-      whileHover={{ scale: 1.07, y: -2 }}
-      whileTap={{ scale: 0.97 }}
-      transition={{ duration: 0.2, ease: 'easeOut' }}
+      whileHover={{ scale: 1.05, y: -4 }}
+      whileTap={{ scale: 0.95 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
       className={`group relative w-full cursor-pointer rounded-xl overflow-hidden
         ring-1 ring-white/5 hover:ring-white/20 hover:shadow-2xl hover:shadow-black/60
         transition-shadow duration-200 ${className}`}
@@ -51,8 +51,9 @@ const ContentCard = memo(({
         <img
           src={src}
           alt={title}
-          className={`w-full h-full object-cover transition-opacity duration-400 ${imageLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
+          className={`w-full h-full object-cover transition-all duration-700 ease-out ${
+            imageLoaded ? 'opacity-100 blur-0 scale-100' : 'opacity-0 blur-md scale-105'
+          }`}
           onLoad={() => setImageLoaded(true)}
           onError={() => { setImageError(true); setImageLoaded(true); }}
         />

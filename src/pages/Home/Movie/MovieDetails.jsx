@@ -301,11 +301,14 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
       <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 md:px-12 -mt-4 md:-mt-10 mb-20">
         
         {/* Video Player Container */}
-        <div className="bg-[#0f1117]/80 backdrop-blur-xl border border-white/5 rounded-2xl md:rounded-[2rem] p-2 md:p-5 shadow-2xl mb-6 ring-1 ring-white/5">
-
+        <div className="relative">
+          {/* Subtle Video Player Glow Backdrop */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-red-600/30 to-blue-600/30 blur-2xl opacity-50 z-0 rounded-2xl md:rounded-[2rem]"></div>
           
-          <div className="w-full aspect-video rounded-xl md:rounded-2xl overflow-hidden bg-black ring-1 ring-white/10 shadow-[0_0_40px_rgba(0,0,0,0.5)] relative">
-            <MemoizedVideoPlayer key={movieId} movieId={movieId} title={movie.title} />
+          <div className="relative z-10 bg-[#0f1117]/80 backdrop-blur-xl border border-white/5 rounded-2xl md:rounded-[2rem] p-2 md:p-5 shadow-2xl mb-6 ring-1 ring-white/5">
+            <div className="w-full aspect-video rounded-xl md:rounded-2xl overflow-hidden bg-black ring-1 ring-white/10 shadow-[0_0_40px_rgba(0,0,0,0.5)] relative">
+              <MemoizedVideoPlayer key={movieId} movieId={movieId} title={movie.title} />
+            </div>
           </div>
         </div>
 
@@ -341,10 +344,10 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
               onMouseDown={onRelatedMouseDown}
               onMouseMove={onRelatedMouseMove}
               onMouseLeave={endRelatedDrag}
-              className={`grid grid-flow-col auto-cols-[140px] md:auto-cols-[180px] gap-4 md:gap-5 overflow-x-auto hide-scrollbar px-4 pt-6 pb-6 -mx-4 -mt-6 select-none ${isDraggingRelated ? 'cursor-grabbing' : 'cursor-grab'}`}
+              className={`grid grid-flow-col auto-cols-[140px] md:auto-cols-[180px] gap-4 md:gap-5 overflow-x-auto hide-scrollbar px-4 pt-6 pb-6 -mx-4 -mt-6 select-none snap-x snap-mandatory ${isDraggingRelated ? 'cursor-grabbing' : 'cursor-grab'}`}
             >
               {related.map((item) => (
-                <div key={item.id} className="shrink-0 transition-transform duration-300 hover:-translate-y-2">
+                <div key={item.id} className="snap-start shrink-0 transition-transform duration-300 hover:-translate-y-2">
                   <ContentCard
                     title={item.title || item.name}
                     poster={item.poster_path ? `${POSTER}${item.poster_path}` : '/placeholder.svg'}
