@@ -60,6 +60,8 @@ export default function AuthModal({ isOpen, onClose }) {
   // Holds a pending Google OAuthCredential when account collision detected
   const [pendingGoogleCred, setPendingGoogleCred] = useState(null);
 
+  const [verificationSent, setVerificationSent] = useState(false);
+
   // Clear errors when switching tabs
   const handleSwitchTab = (toLogin) => {
     setIsLogin(toLogin);
@@ -67,6 +69,7 @@ export default function AuthModal({ isOpen, onClose }) {
     setShowReset(false);
     setResetSent(false);
     setPendingGoogleCred(null);
+    setVerificationSent(false);
   };
 
   const handleForgotPassword = async (e) => {
@@ -94,6 +97,13 @@ export default function AuthModal({ isOpen, onClose }) {
         // Sign in with email/password
         const result = await signInWithEmailAndPassword(auth, email, password);
 
+        // Enforce email verification
+        if (!result.user.emailVerified) {
+          await auth.signOut();
+          setError('Please verify your email address before logging in. Check your inbox or spam folder.');
+          return; // Stop early
+        }
+
         // If there is a pending Google credential from a collision, link it now
         if (pendingGoogleCred) {
           await linkWithCredential(result.user, pendingGoogleCred);
@@ -107,10 +117,14 @@ export default function AuthModal({ isOpen, onClose }) {
         await updateProfile(userCredential.user, { displayName: name });
         // Save to Firestore with the displayName we just set
         await saveUserToFirestore({ ...userCredential.user, displayName: name });
-        // Send verification email
-        import('firebase/auth').then(({ sendEmailVerification }) => {
-          sendEmailVerification(userCredential.user);
-        });
+        
+        // Send verification email and immediately sign them out to block unverified access
+        const { sendEmailVerification } = await import('firebase/auth');
+        await sendEmailVerification(userCredential.user);
+        await auth.signOut();
+        
+        setVerificationSent(true);
+        return; // Stop early so we show the success screen
       }
       onClose();
     } catch (err) {
@@ -280,6 +294,26 @@ export default function AuthModal({ isOpen, onClose }) {
                       </>
                     )}
                   </form>
+                ) : verificationSent ? (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex flex-col items-center gap-3 py-4 text-center"
+                  >
+                    <FaCheckCircle className="text-green-400 text-4xl" />
+                    <h2 className="text-white font-bold text-lg mt-2">Verify your email</h2>
+                    <p className="text-gray-400 text-sm">
+                      We've sent a verification link to <strong className="text-white">{email}</strong>. 
+                      Please check your inbox and click the link to activate your account.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => handleSwitchTab(true)}
+                      className="mt-4 w-full py-3.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-all"
+                    >
+                      Return to Log In
+                    </button>
+                  </motion.div>
                 ) : (
                 <form className="space-y-4" onSubmit={handleSubmit}>
                   {!isLogin && (
