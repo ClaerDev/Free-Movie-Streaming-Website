@@ -69,7 +69,7 @@ export default function HeroBanner() {
     if (items.length < 2) return;
     const id = setInterval(() => goTo(prev => (prev + 1) % items.length), INTERVAL);
     return () => clearInterval(id);
-  }, [items.length, goTo]);
+  }, [items.length, goTo, barKey]);
 
   if (loading) {
     return (

@@ -11,6 +11,7 @@ export const fetchContentByGenre = async (type, genreId, page = 1, overrideParam
     const isDonghuaCategory = type === 'tv' && genreId === -4;
     const isPopularitySort = sortBy === 'popularity.desc';
     const isMoviePopularitySort = type === 'movie' && isPopularitySort;
+    const isMovieNewestSort = type === 'movie' && sortBy === 'primary_release_date.desc';
     const isTvNewestSort = type === 'tv' && sortBy === 'first_air_date.desc';
     const isTvPopularitySort = type === 'tv' && sortBy === 'popularity.desc';
     const isTvTopRatedSort = type === 'tv' && sortBy.startsWith('vote_average');
@@ -34,7 +35,10 @@ export const fetchContentByGenre = async (type, genreId, page = 1, overrideParam
     url.searchParams.append('include_adult', 'false');
     // Require minimum votes when sorting by rating to avoid low-vote noise
     if (sortBy.startsWith('vote_average')) {
-      url.searchParams.append('vote_count.gte', isSpecialCategory ? String(specialTopRatedMinVotes) : '150');
+      url.searchParams.append('vote_count.gte', isSpecialCategory ? String(specialTopRatedMinVotes) : '300');
+    } else if (!isPopularitySort) {
+      // General floor for Newest/Oldest on generic genres
+      if (!isSpecialCategory) url.searchParams.append('vote_count.gte', '50');
     }
 
     // Keep TV top-rated results realistic and avoid sparse lists with invalid/future dates.
@@ -49,7 +53,12 @@ export const fetchContentByGenre = async (type, genreId, page = 1, overrideParam
     if (isTvNewestSort) {
       url.searchParams.append('include_null_first_air_dates', 'false');
       url.searchParams.append('first_air_date.lte', today);
-      url.searchParams.append('vote_count.gte', '20');
+      url.searchParams.append('vote_count.gte', '50');
+    }
+    
+    if (isMovieNewestSort) {
+      url.searchParams.append('primary_release_date.lte', today);
+      url.searchParams.append('vote_count.gte', '50');
     }
 
     // Improve "Most Popular" quality for TV by filtering out low-signal or unaired records.

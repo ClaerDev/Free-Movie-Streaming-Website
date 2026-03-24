@@ -4,6 +4,7 @@ import { toDetailPath } from './urlUtils';
 import HeroBanner from './HeroBanner';
 import TrendingRow from './TrendingRow';
 import ContinueWatchingRow from './ContinueWatchingRow';
+import PersonalizedRow from './PersonalizedRow';
 import SEO from './SEO';
 
 const SectionDivider = ({ label }) => (
@@ -52,6 +53,7 @@ export default function HomePage() {
 
       <div className="pt-10 pb-8">
         <ContinueWatchingRow onSelect={handleSelect} />
+        <PersonalizedRow onSelect={handleSelect} />
 
         {/* ── Movies ── */}
         <TrendingRow
