@@ -1,7 +1,7 @@
 import React, { useState, memo, useCallback, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
-import { FaPlay, FaStar, FaPlus, FaCheck, FaTrash } from 'react-icons/fa';
+import { FaPlay, FaStar, FaPlus, FaCheck, FaTrash, FaVolumeMute, FaVolumeUp } from 'react-icons/fa';
 import { useWatchlist } from '../../context/WatchlistContext';
 
 const ContentCard = memo(({
@@ -73,7 +73,25 @@ const ContentCard = memo(({
   const [trailerKey, setTrailerKey] = useState(null);
   const [trailerError, setTrailerError] = useState(false);
   const [popoutOrigin, setPopoutOrigin] = useState('center');
+  const [isMuted, setIsMuted] = useState(true);
+  
   const hoverTimerRef = useRef(null);
+  const iframeRef = useRef(null);
+
+  const toggleMute = useCallback((e) => {
+    e.stopPropagation();
+    if (!iframeRef.current) return;
+    const newState = !isMuted;
+    setIsMuted(newState);
+    iframeRef.current.contentWindow.postMessage(
+      JSON.stringify({
+        event: 'command',
+        func: newState ? 'mute' : 'unMute',
+        args: []
+      }),
+      '*'
+    );
+  }, [isMuted]);
 
   const handleMouseEnter = useCallback((e) => {
     if (!mediaId || !mediaType) return;
@@ -95,6 +113,7 @@ const ContentCard = memo(({
   const handleMouseLeave = useCallback(() => {
     if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
     setShowTrailer(false);
+    setIsMuted(true);
   }, []);
 
   useEffect(() => {
@@ -231,12 +250,20 @@ const ContentCard = memo(({
             {/* 16:9 Video Top */}
             <div className="relative w-full aspect-video bg-black cursor-pointer overflow-hidden" onClick={onClick}>
               <iframe
+                ref={iframeRef}
                 title="Trailer"
-                src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=0&controls=0&modestbranding=1&loop=1&playlist=${trailerKey}&playsinline=1`}
+                src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=1&controls=0&modestbranding=1&loop=1&playlist=${trailerKey}&playsinline=1&enablejsapi=1`}
                 className="w-full h-full scale-[1.35] pointer-events-none"
                 allow="autoplay; encrypted-media"
               />
               <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-[#181818] to-transparent pointer-events-none" />
+              {/* Mute / Unmute button */}
+              <button
+                onClick={toggleMute}
+                className="absolute bottom-2 right-2 z-20 w-8 h-8 rounded-full bg-black/60 border border-white/30 flex items-center justify-center text-white hover:bg-black/80 hover:border-white transition-all backdrop-blur-sm"
+              >
+                {isMuted ? <FaVolumeMute className="text-[11px]" /> : <FaVolumeUp className="text-[11px]" />}
+              </button>
             </div>
 
             {/* Info Panel Bottom */}
