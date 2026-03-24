@@ -10,6 +10,7 @@ import DetailPageSkeleton from "../reused/DetailPageSkeleton";
 import VideoPlayer from "./VideoPlayer";
 import SEO from "../SEO";
 import ContentCard from "../ContentCard";
+import CastRow from "../reused/CastRow";
 import AuthModal from "../../../components/AuthModal";
 import { useWatchlist } from "../../../context/WatchlistContext";
 
@@ -379,6 +380,11 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
           </p>
         </div>
       </div>
+
+      {/* ── CAST & CREW ── */}
+      {movie.credits?.cast && movie.credits.cast.length > 0 && (
+        <CastRow cast={movie.credits.cast} />
+      )}
 
       {/* ── RELATED TITLES ── */}
       {related.length > 0 && (

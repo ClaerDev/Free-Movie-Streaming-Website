@@ -1,4 +1,4 @@
-import React, { useState, memo, useCallback } from 'react';
+import React, { useState, memo, useCallback, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { FaPlay, FaStar, FaPlus, FaCheck, FaTrash } from 'react-icons/fa';
@@ -68,6 +68,41 @@ const ContentCard = memo(({
   const ratingColor = rating >= 7 ? 'text-green-400' : rating >= 5 ? 'text-yellow-400' : 'text-red-400';
   const showWatchlistBtn = !!mediaId;
 
+  // ── Hover Trailer Logic ──
+  const [showTrailer, setShowTrailer] = useState(false);
+  const [trailerKey, setTrailerKey] = useState(null);
+  const [trailerError, setTrailerError] = useState(false);
+  const hoverTimerRef = useRef(null);
+
+  const handleMouseEnter = useCallback(() => {
+    if (!mediaId || !mediaType) return;
+    hoverTimerRef.current = setTimeout(() => {
+      setShowTrailer(true);
+    }, 800); // 800ms hover creates an intentional feel
+  }, [mediaId, mediaType]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    setShowTrailer(false);
+  }, []);
+
+  useEffect(() => {
+    if (showTrailer && !trailerKey && !trailerError) {
+      let cancelled = false;
+      const API_KEY = import.meta.env.VITE_TMDB_API;
+      fetch(`https://api.themoviedb.org/3/${mediaType}/${mediaId}/videos?api_key=${API_KEY}`)
+        .then(res => res.json())
+        .then(data => {
+          if (cancelled) return;
+          const v = data.results?.find(vid => vid.type === 'Trailer' && vid.site === 'YouTube');
+          if (v) setTrailerKey(v.key);
+          else setTrailerError(true);
+        })
+        .catch(() => setTrailerError(true));
+      return () => { cancelled = true; };
+    }
+  }, [showTrailer, mediaId, mediaType, trailerKey, trailerError]);
+
   return (
     <motion.div
       whileHover={{ scale: 1.05, y: -4 }}
@@ -80,10 +115,24 @@ const ContentCard = memo(({
       role="button"
       tabIndex={0}
       onKeyPress={handleKeyPress}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       aria-label={`${title}${year ? ` (${year})` : ''}`}
     >
       {/* Poster */}
       <div className="relative w-full aspect-[2/3] bg-[#111827]">
+        {/* Hover Trailer Iframe */}
+        {showTrailer && trailerKey && (
+          <div className="absolute inset-0 z-10 bg-black overflow-hidden pointer-events-none animate-in fade-in duration-500">
+            {/* 3x scale trick to crop letterboxes & fit vertically */}
+            <iframe
+              title="Trailer"
+              src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=1&controls=0&modestbranding=1&loop=1&playlist=${trailerKey}&playsinline=1`}
+              className="absolute top-1/2 left-1/2 w-[300%] h-[300%] -translate-x-1/2 -translate-y-1/2"
+              allow="autoplay; encrypted-media"
+            />
+          </div>
+        )}
         {/* Skeleton */}
         {!imageLoaded && !imageError && (
           <div className="absolute inset-0 animate-pulse bg-gradient-to-b from-white/5 to-white/[0.02]" />

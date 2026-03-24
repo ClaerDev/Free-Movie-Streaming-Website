@@ -77,6 +77,7 @@ const normalizeItems = (pages) => {
   const merged = [];
   for (const page of pages) {
     for (const item of page.results ?? []) {
+      if (!item.poster_path) continue;
       const mediaType = item.media_type === 'tv' ? 'tv' : 'movie';
       const key = `${mediaType}_${item.id}`;
       if (seen.has(key)) continue;

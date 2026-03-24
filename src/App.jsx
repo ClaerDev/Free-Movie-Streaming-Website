@@ -10,6 +10,7 @@ import TvDetails from './pages/Home/TV/TvDetails';
 import WatchlistPage from './pages/Home/WatchlistPage';
 import ResetPasswordPage from './pages/Home/ResetPasswordPage';
 import EmailVerificationPage from './pages/Home/EmailVerificationPage';
+import PersonPage from './pages/Home/Person/PersonPage';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route path="/movies/watch/:slug" element={<MovieDetails />} />
           <Route path="/series/watch/:slug" element={<TvDetails />} />
           <Route path="/search" element={<SearchPage />} />
+          <Route path="/person/:id/:slug" element={<PersonPage />} />
           <Route path="/watchlist" element={<WatchlistPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/verify-email" element={<EmailVerificationPage />} />

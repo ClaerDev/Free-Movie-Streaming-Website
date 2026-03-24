@@ -134,6 +134,7 @@ export const fetchMovieDetails = async (movieId) => {
     const url = new URL(`${BASE_URL}/movie/${movieId}`);
     url.searchParams.append('api_key', API_KEY);
     url.searchParams.append('language', 'en-US');
+    url.searchParams.append('append_to_response', 'credits');
 
     const response = await fetch(url);
 
@@ -183,6 +184,7 @@ export const fetchSeriesDetails = async (tvId) => {
     const url = new URL(`${BASE_URL}/tv/${tvId}`);
     url.searchParams.append('api_key', API_KEY);
     url.searchParams.append('language', 'en-US');
+    url.searchParams.append('append_to_response', 'credits');
 
     const response = await fetch(url);
 
@@ -257,3 +259,29 @@ export const fetchRelatedSeries = async (tvId) => {
     throw new Error(`Related TV series fetch failed: ${error.message}`);
   }
 };
+
+/**
+ * Fetch actor/crew details and combined credits.
+ * @param {number} personId - The ID of the person
+ */
+export const fetchPersonDetails = async (personId) => {
+  try {
+    const url = new URL(`${BASE_URL}/person/${personId}`);
+    url.searchParams.append('api_key', API_KEY);
+    url.searchParams.append('language', 'en-US');
+    url.searchParams.append('append_to_response', 'combined_credits');
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.status_message || `Failed to fetch person details`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    throw new Error(`Person fetch failed: ${error.message}`);
+  }
+};
+

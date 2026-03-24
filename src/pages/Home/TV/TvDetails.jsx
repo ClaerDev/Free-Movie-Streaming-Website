@@ -18,6 +18,7 @@ import DetailPageSkeleton from "../reused/DetailPageSkeleton";
 import VideoPlayer from "./VideoPlayer";
 import SEO from "../SEO";
 import ContentCard from "../ContentCard";
+import CastRow from "../reused/CastRow";
 import AuthModal from "../../../components/AuthModal";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../../firebase";
@@ -129,8 +130,20 @@ const TvDetails = ({ tvId: tvIdProp }) => {
         // Read URL params at fetch time so the correct season/episode is set as the
         // initial state directly — prevents S1E1 flash before URL sync can override.
         const urlParams = new URLSearchParams(window.location.search);
-        const urlSeason = getValidParamNumber(urlParams, 'season');
-        const urlEpisode = getValidParamNumber(urlParams, 'episode');
+        let urlSeason = getValidParamNumber(urlParams, 'season');
+        let urlEpisode = getValidParamNumber(urlParams, 'episode');
+
+        // ++ Progress Tracking: Resume from exact episode if found in Continue Watching cache ++
+        if (urlSeason === null && urlEpisode === null) {
+          try {
+            const cwCache = JSON.parse(localStorage.getItem('wf_cw_cache_items') || '[]');
+            const cwMatch = cwCache.find(cw => cw.id === numericTvId);
+            if (cwMatch && cwMatch.season && cwMatch.episode) {
+              urlSeason = cwMatch.season;
+              urlEpisode = cwMatch.episode;
+            }
+          } catch { /* ignore cache parse errors */ }
+        }
 
         const selectedSeason =
           (urlSeason && filtered.find((s) => s.season_number === urlSeason))
@@ -821,6 +834,11 @@ const TvDetails = ({ tvId: tvIdProp }) => {
             </div>
           </section>
         </div>
+      )}
+
+      {/* ── CAST & CREW ── */}
+      {tv.credits?.cast && tv.credits.cast.length > 0 && (
+        <CastRow cast={tv.credits.cast} />
       )}
 
       {/* ── RELATED TITLES ── */}
