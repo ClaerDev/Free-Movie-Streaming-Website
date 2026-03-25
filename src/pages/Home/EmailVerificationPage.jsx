@@ -37,10 +37,10 @@ export default function EmailVerificationPage() {
         // 3. If they opened the link in the SAME browser/device they registered with, 
         // silently refresh their profile and log them in completely.
         if (auth.currentUser) {
-          await auth.currentUser.reload();
-          
-          const ref = doc(db, 'users', auth.currentUser.uid);
-          await setDoc(ref, { emailVerified: true }, { merge: true });
+          auth.currentUser.reload().then(() => {
+            const ref = doc(db, 'users', auth.currentUser.uid);
+            setDoc(ref, { emailVerified: true }, { merge: true }).catch(console.error);
+          }).catch(console.error);
         }
         
         setSuccess(true);
