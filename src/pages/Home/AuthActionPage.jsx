@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 
 export default function AuthActionPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const mode = searchParams.get('mode');
@@ -16,15 +17,16 @@ export default function AuthActionPage() {
     }
 
     // Redirect to the correct feature page based on Firebase mode
+    // We pass `location.search` to forward all parameters (?mode=...&oobCode=...&apiKey=...)
     if (mode === 'resetPassword') {
-      navigate(`/reset-password?oobCode=${encodeURIComponent(oobCode)}`, { replace: true });
+      navigate(`/reset-password${location.search}`, { replace: true });
     } else if (mode === 'verifyEmail') {
-      navigate(`/verify-email?oobCode=${encodeURIComponent(oobCode)}`, { replace: true });
+      navigate(`/verify-email${location.search}`, { replace: true });
     } else {
       // Fallback for unhandled modes like 'recoverEmail'
       navigate('/', { replace: true });
     }
-  }, [navigate, searchParams]);
+  }, [navigate, searchParams, location]);
 
   return (
     <div className="flex justify-center items-center min-h-[50vh]">
