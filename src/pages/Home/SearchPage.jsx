@@ -400,7 +400,7 @@ function SearchPage() {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
-      className="min-h-screen bg-black text-white px-4 sm:px-8 pt-6 sm:pt-10 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-16"
+      className="min-h-screen bg-black text-white pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-16"
     >
       <SEO
         title={debouncedQuery ? `"${debouncedQuery}" - Search Results` : 'Search & Browse Movies & TV Shows'}
@@ -410,55 +410,62 @@ function SearchPage() {
             : 'Search and browse movies & TV shows by genre, year, and rating on WeFlix.'
         }
       />
-      <h1 className="text-3xl font-bold mb-6">Search</h1>
 
-      {/* ── Search + Filter Toggle row ── */}
-      <div className="flex gap-3 items-center max-w-3xl">
-        <div className="relative flex-1">
-          <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none" />
-          <input
-            ref={inputRef}
-            type="text"
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            placeholder="Search movies, TV shows, genres..."
-            className="w-full bg-gray-800/60 border border-gray-700/50 text-white pl-11 pr-10 py-3.5 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent placeholder-gray-500 transition-all duration-200"
-          />
-          {showInitialLoading && (
-            <div className="absolute right-10 top-1/2 -translate-y-1/2">
-              <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
-            </div>
-          )}
-          {query && (
-            <button
-              onClick={clearQuery}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
-              aria-label="Clear"
-            >
-              <FaTimes />
-            </button>
-          )}
+      {/* Sticky top bar (mobile) */}
+      <div className="sticky top-0 z-40 backdrop-blur-md bg-black/90 border-b border-white/[0.06] px-4 sm:px-8 pt-4 pb-3">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-3">Search</h1>
+
+        {/* Search + Filter Toggle row */}
+        <div className="flex gap-3 items-center">
+          <div className="relative flex-1 min-w-0">
+            <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none" />
+            <input
+              ref={inputRef}
+              type="text"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder="Search movies, TV shows..."
+              className="w-full bg-gray-800/60 border border-gray-700/50 text-white pl-11 pr-10 py-3 sm:py-3.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent placeholder-gray-500 transition-all duration-200"
+            />
+            {showInitialLoading && (
+              <div className="absolute right-10 top-1/2 -translate-y-1/2">
+                <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
+            {query && (
+              <button
+                onClick={clearQuery}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                aria-label="Clear"
+              >
+                <FaTimes />
+              </button>
+            )}
+          </div>
+
+          {/* Filter toggle button */}
+          <button
+            onClick={() => setFiltersOpen(o => !o)}
+            className={`relative flex-shrink-0 flex items-center gap-2 px-3 sm:px-4 py-3 sm:py-3.5 rounded-xl border text-sm font-semibold transition-all duration-200
+              ${filtersOpen
+                ? 'bg-red-600 border-red-500 text-white shadow-lg shadow-red-600/30'
+                : 'bg-gray-800/60 border-gray-700/50 text-gray-300 hover:border-gray-500 hover:text-white'
+              }`}
+            aria-label="Toggle filters"
+          >
+            <MdOutlineTune className="text-lg" />
+            <span className="hidden sm:inline">Filters</span>
+            {activeFilterCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center border-2 border-black">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
         </div>
-
-        {/* Filter toggle button */}
-        <button
-          onClick={() => setFiltersOpen(o => !o)}
-          className={`relative flex-shrink-0 flex items-center gap-2 px-4 py-3.5 rounded-xl border text-sm font-semibold transition-all duration-200
-            ${filtersOpen
-              ? 'bg-red-600 border-red-500 text-white shadow-lg shadow-red-600/30'
-              : 'bg-gray-800/60 border-gray-700/50 text-gray-300 hover:border-gray-500 hover:text-white'
-            }`}
-          aria-label="Toggle filters"
-        >
-          <MdOutlineTune className="text-lg" />
-          <span className="hidden sm:inline">Filters</span>
-          {activeFilterCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center border-2 border-black">
-              {activeFilterCount}
-            </span>
-          )}
-        </button>
       </div>
+
+      {/* Content area (padded) */}
+      <div className="px-4 sm:px-8 pt-4">
 
       {/* ── Filter Panel ── */}
       <AnimatePresence>
@@ -667,6 +674,7 @@ function SearchPage() {
           </div>
         )}
       </section>
+      </div>{/* end content area */}
     </motion.div>
   );
 }
