@@ -58,14 +58,26 @@ function ParentComponent() {
 
   // Hide bottom nav when the virtual keyboard is open (mobile)
   useEffect(() => {
-    const vv = window.visualViewport;
-    if (!vv) return;
-    const onResize = () => {
-      // Keyboard is considered open when visual viewport is >20% shorter than window
-      setKeyboardOpen(vv.height < window.innerHeight * 0.8);
+    const handleFocusIn = (e) => {
+      const tag = e.target.tagName?.toLowerCase();
+      if (tag === 'input' || tag === 'textarea') {
+        setKeyboardOpen(true);
+      }
     };
-    vv.addEventListener('resize', onResize);
-    return () => vv.removeEventListener('resize', onResize);
+    const handleFocusOut = (e) => {
+      const tag = e.target.tagName?.toLowerCase();
+      if (tag === 'input' || tag === 'textarea') {
+        setKeyboardOpen(false);
+      }
+    };
+
+    window.addEventListener('focusin', handleFocusIn);
+    window.addEventListener('focusout', handleFocusOut);
+
+    return () => {
+      window.removeEventListener('focusin', handleFocusIn);
+      window.removeEventListener('focusout', handleFocusOut);
+    };
   }, []);
 
   const selectedGenreId = (() => {
