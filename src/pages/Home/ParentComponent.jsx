@@ -58,6 +58,7 @@ function ParentComponent() {
 
   // Hide bottom nav when the virtual keyboard is open (mobile)
   useEffect(() => {
+    let timeoutId;
     const handleFocusIn = (e) => {
       const tag = e.target.tagName?.toLowerCase();
       if (tag === 'input' || tag === 'textarea') {
@@ -67,16 +68,36 @@ function ParentComponent() {
     const handleFocusOut = (e) => {
       const tag = e.target.tagName?.toLowerCase();
       if (tag === 'input' || tag === 'textarea') {
-        setKeyboardOpen(false);
+        // Delay closing slightly to prevent flicker if jumping between inputs
+        timeoutId = setTimeout(() => setKeyboardOpen(false), 150);
+      }
+    };
+
+    const vv = window.visualViewport;
+    const handleResize = () => {
+      if (vv) {
+        // iOS Safari resize logic
+        if (vv.height < window.innerHeight * 0.85) {
+          setKeyboardOpen(true);
+        } else {
+          // Check if we're actually still focused on an input
+          const activeTag = document.activeElement?.tagName?.toLowerCase();
+          if (activeTag !== 'input' && activeTag !== 'textarea') {
+            setKeyboardOpen(false);
+          }
+        }
       }
     };
 
     window.addEventListener('focusin', handleFocusIn);
     window.addEventListener('focusout', handleFocusOut);
+    if (vv) vv.addEventListener('resize', handleResize);
 
     return () => {
+      clearTimeout(timeoutId);
       window.removeEventListener('focusin', handleFocusIn);
       window.removeEventListener('focusout', handleFocusOut);
+      if (vv) vv.removeEventListener('resize', handleResize);
     };
   }, []);
 
@@ -153,7 +174,7 @@ function ParentComponent() {
       </div>
 
       {/* Mobile bottom navigation */}
-      <nav className={`md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#070b14] border-t border-white/[0.08] shadow-[0_-10px_30px_rgba(0,0,0,0.55)] flex items-center justify-around px-2 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.45rem)] transition-transform duration-200 ${keyboardOpen ? 'translate-y-full' : 'translate-y-0'}`}>
+      <nav className={`md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#070b14] border-t border-white/[0.08] shadow-[0_-10px_30px_rgba(0,0,0,0.55)] items-center justify-around px-2 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.45rem)] ${keyboardOpen ? 'hidden' : 'flex'}`}>
         {[
           { id: 'home',   icon: BiHomeAlt,   label: 'Home'    },
           { id: 'movies', icon: BiMoviePlay, label: 'Movies'  },
