@@ -59,44 +59,42 @@ function ParentComponent() {
   // Hide bottom nav when the virtual keyboard is open (mobile)
   useEffect(() => {
     let timeoutId;
-    const handleFocusIn = (e) => {
+    const handleFocus = (e) => {
       const tag = e.target.tagName?.toLowerCase();
       if (tag === 'input' || tag === 'textarea') {
         setKeyboardOpen(true);
       }
     };
-    const handleFocusOut = (e) => {
+    const handleBlur = (e) => {
       const tag = e.target.tagName?.toLowerCase();
       if (tag === 'input' || tag === 'textarea') {
         // Delay closing slightly to prevent flicker if jumping between inputs
-        timeoutId = setTimeout(() => setKeyboardOpen(false), 150);
-      }
-    };
-
-    const vv = window.visualViewport;
-    const handleResize = () => {
-      if (vv) {
-        // iOS Safari resize logic
-        if (vv.height < window.innerHeight * 0.85) {
-          setKeyboardOpen(true);
-        } else {
-          // Check if we're actually still focused on an input
+        timeoutId = setTimeout(() => {
+          // Double check if focus moved to another input
           const activeTag = document.activeElement?.tagName?.toLowerCase();
           if (activeTag !== 'input' && activeTag !== 'textarea') {
             setKeyboardOpen(false);
           }
-        }
+        }, 150);
       }
     };
 
-    window.addEventListener('focusin', handleFocusIn);
-    window.addEventListener('focusout', handleFocusOut);
+    // Use capture phase for focus/blur as they are much more reliable than focusin/focusout bubbling on iOS PWAs
+    document.addEventListener('focus', handleFocus, true);
+    document.addEventListener('blur', handleBlur, true);
+
+    const vv = window.visualViewport;
+    const handleResize = () => {
+      if (vv && vv.height < window.innerHeight * 0.85) {
+        setKeyboardOpen(true);
+      }
+    };
     if (vv) vv.addEventListener('resize', handleResize);
 
     return () => {
       clearTimeout(timeoutId);
-      window.removeEventListener('focusin', handleFocusIn);
-      window.removeEventListener('focusout', handleFocusOut);
+      document.removeEventListener('focus', handleFocus, true);
+      document.removeEventListener('blur', handleBlur, true);
       if (vv) vv.removeEventListener('resize', handleResize);
     };
   }, []);
