@@ -21,26 +21,24 @@ function WatchlistPage() {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
-      className="min-h-screen bg-black text-white pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-16"
+      className="min-h-screen bg-black text-white px-4 sm:px-8 pt-0 md:pt-10 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-16"
     >
       <SEO title="My Watchlist - WeFlix" description="View your saved movies and TV shows." />
 
-      {/* Sticky top bar — mobile */}
-      <div className="sticky top-0 z-40 backdrop-blur-md bg-black/90 border-b border-white/[0.06]">
-        <div className="px-4 sm:px-8 pt-4 pb-3 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-red-500/10 border border-red-500/20 shrink-0">
-              <FaBookmark className="text-red-500 text-base" />
-            </div>
-            <h1 className="text-lg sm:text-3xl font-bold tracking-tight">My Watchlist</h1>
-          </div>
-          {user && items.length > 0 && (
-            <span className="text-xs text-gray-500 font-medium shrink-0">{items.length} saved</span>
-          )}
+      {/* Mobile-aware sticky top bar */}
+      <div className="sticky top-0 z-40 -mx-4 sm:-mx-8 px-4 sm:px-8 pt-[calc(env(safe-area-inset-top)+0.75rem)] md:pt-0 pb-3 md:pb-0 backdrop-blur-md bg-black/80 md:bg-transparent border-b border-white/[0.06] md:border-none mb-4 md:mb-0">
+        <div className="flex items-center gap-3 md:hidden">
+          <span className="w-1.5 h-8 bg-red-600 rounded-full inline-block shadow-[0_0_10px_rgba(220,38,38,0.5)]" />
+          <h1 className="text-2xl font-bold tracking-tight">My Watchlist</h1>
         </div>
       </div>
 
-      <div className="px-4 sm:px-8 pt-4">
+      {/* Desktop heading */}
+      <div className="hidden md:flex items-center gap-3 mb-6">
+        <span className="w-1.5 h-8 bg-red-600 rounded-full inline-block shadow-[0_0_10px_rgba(220,38,38,0.5)]" />
+        <h1 className="text-3xl font-bold tracking-tight">My Watchlist</h1>
+      </div>
+
       {/* Not logged in */}
       {!loading && !user && (
         <div className="flex items-center justify-center min-h-[60vh]">
@@ -164,7 +162,6 @@ function WatchlistPage() {
           </AnimatePresence>
         </motion.div>
       )}
-      </div>{/* end content area */}
     </motion.div>
   );
 }
