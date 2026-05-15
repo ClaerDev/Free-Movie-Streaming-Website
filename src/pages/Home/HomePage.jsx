@@ -88,10 +88,7 @@ export default function HomePage() {
 
         {/* ── Non-intrusive Ad (between Movies & TV) ── */}
         <div className="px-4 sm:px-6 mb-6 max-w-7xl mx-auto">
-          <AdBanner
-            zoneId={import.meta.env.VITE_PA_ZONE_HOMEPAGE}
-            format="banner"
-          />
+          <AdBanner />
         </div>
 
         {/* ── TV ── */}

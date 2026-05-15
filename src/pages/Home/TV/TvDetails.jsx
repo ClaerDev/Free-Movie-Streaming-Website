@@ -655,10 +655,7 @@ const TvDetails = ({ tvId: tvIdProp }) => {
 
       {/* Info Banner (match Movies) */}
       <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 md:px-12 mb-4">
-        <AdBanner
-          zoneId={import.meta.env.VITE_PA_ZONE_DETAILS}
-          format="banner"
-        />
+        <AdBanner />
       </div>
 
       {/* Info Banner (match Movies) */}

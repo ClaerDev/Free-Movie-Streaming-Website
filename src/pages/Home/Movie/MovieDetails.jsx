@@ -363,11 +363,7 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
         </div>
 
         {/* ── Ad Banner (between player and info) ── */}
-        <AdBanner
-          zoneId={import.meta.env.VITE_PA_ZONE_DETAILS}
-          format="banner"
-          className="mx-2 md:mx-0 mb-6"
-        />
+        <AdBanner className="mx-2 md:mx-0 mb-6" />
 
         {/* Info Banner */}
         <div className="flex items-start gap-4 bg-blue-900/10 border border-blue-500/20 rounded-2xl p-4 md:p-5 mx-2 md:mx-0">
