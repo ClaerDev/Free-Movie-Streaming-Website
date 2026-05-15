@@ -56,23 +56,8 @@
     <!-- Monetag Push Notification (zone 11008204) — service worker based -->
     <script src="https://5gvci.com/act/files/tag.min.js?z=11008204" data-cfasync="false" async></script>
 
-    <!-- Monetag Wise Tag (zone 239444) — auto-manages Vignette, In-Page Push & Popunder — 10-min cooldown -->
-    <script>
-      (function() {
-        var COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
-        var key = 'wf_ad_last_shown';
-        var last = parseInt(localStorage.getItem(key) || '0', 10);
-        if (Date.now() - last >= COOLDOWN_MS) {
-          localStorage.setItem(key, Date.now());
-          var s = document.createElement('script');
-          s.src = 'https://quge5.com/88/tag.min.js';
-          s.dataset.zone = '239444';
-          s.async = true;
-          s.setAttribute('data-cfasync', 'false');
-          document.head.appendChild(s);
-        }
-      })();
-    </script>
+    <!-- Monetag Wise Tag (zone 239444) — auto-manages Vignette, In-Page Push & Popunder -->
+    <script src="https://quge5.com/88/tag.min.js" data-zone="239444" async data-cfasync="false"></script>
   </head>
 
   <body>
