@@ -43,20 +43,25 @@
 
     <!-- JSON-LD: WebSite schema with Sitelinks Searchbox -->
     <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"WeFlix","url":"https://www.weflix.app/","description":"Watch trending movies and TV shows free on WeFlix.","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://www.weflix.app/search?q={search_term_string}"},"query-input":"required name=search_term_string"}}</script>
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-H670PNW2CH"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-H670PNW2CH');
+    </script>
+    
+    <!-- Monetag Push Notification -->
+    <script src="https://5gvci.com/act/files/tag.min.js?z=11008204" data-cfasync="false" async></script>
+    <!-- Monetag Multitag (all-in-one ads) -->
+    <script src="https://quge5.com/88/tag.min.js" data-zone="239444" async data-cfasync="false"></script>
   </head>
-
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-H670PNW2CH"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-H670PNW2CH');
-</script>
 
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
+
