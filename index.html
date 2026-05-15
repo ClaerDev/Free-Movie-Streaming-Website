@@ -57,8 +57,21 @@
     <script src="https://5gvci.com/act/files/tag.min.js?z=11008204" data-cfasync="false" async></script>
     <!-- Monetag Wise Tag / Multitag (zone 239444 — manages Vignette, In-Page Push, Popunder) -->
     <script src="https://quge5.com/88/tag.min.js" data-zone="239444" async data-cfasync="false"></script>
-    <!-- Monetag In-Page Push (zone 11008150) -->
-    <script>(function(s){s.dataset.zone='11008150',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+    <!-- Monetag In-Page Push (zone 11008150) — 30-min cooldown per user -->
+    <script>
+      (function() {
+        var COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes
+        var key = 'wf_ad_last_shown';
+        var last = parseInt(localStorage.getItem(key) || '0', 10);
+        if (Date.now() - last >= COOLDOWN_MS) {
+          localStorage.setItem(key, Date.now());
+          (function(s){
+            s.dataset.zone='11008150';
+            s.src='https://nap5k.com/tag.min.js';
+          })([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')));
+        }
+      })();
+    </script>
   </head>
 
   <body>
