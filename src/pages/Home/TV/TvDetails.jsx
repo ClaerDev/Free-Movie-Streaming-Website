@@ -20,6 +20,7 @@ import SEO from "../SEO";
 import ContentCard from "../ContentCard";
 import CastRow from "../reused/CastRow";
 import AuthModal from "../../../components/AuthModal";
+import AdBanner from "../../../components/AdBanner";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../../firebase";
 import { useWatchlist } from "../../../context/WatchlistContext";
@@ -650,6 +651,14 @@ const TvDetails = ({ tvId: tvIdProp }) => {
           )}
           </div>
         </div>
+      </div>
+
+      {/* Info Banner (match Movies) */}
+      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 md:px-12 mb-4">
+        <AdBanner
+          zoneId={import.meta.env.VITE_PA_ZONE_DETAILS}
+          format="banner"
+        />
       </div>
 
       {/* Info Banner (match Movies) */}

@@ -12,6 +12,7 @@ import ContentCard from './ContentCard';
 import { GENRES, SPECIAL_CATEGORIES } from './tmdb';
 import { buildBrowsePath } from './urlFilters';
 import SEO from './SEO';
+import AdBanner from '../../components/AdBanner';
 
 const CONFIG = {
   API_KEY: import.meta.env.VITE_TMDB_API,
@@ -577,6 +578,13 @@ function SearchPage() {
       </AnimatePresence>
 
       {error && <p className="mt-3 text-red-500 text-sm">{error.message}</p>}
+
+      {/* ── Ad Banner (between filters and results) ── */}
+      <AdBanner
+        zoneId={import.meta.env.VITE_PA_ZONE_SEARCH}
+        format="banner"
+        className="mt-5 max-w-3xl"
+      />
 
       {/* ── Category shortcut chips (appear when typing a genre name) ── */}
       {matchedCategories.length > 0 && (
