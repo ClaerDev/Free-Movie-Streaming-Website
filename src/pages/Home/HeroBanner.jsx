@@ -155,9 +155,9 @@ export default function HeroBanner() {
         </div>
 
         {/* Title */}
-        <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-black text-white leading-[1.05] tracking-tight mb-3 drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">
+        <h2 className="text-4xl md:text-5xl lg:text-[3.25rem] font-black text-white leading-[1.05] tracking-tight mb-3 drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">
           {title}
-        </h1>
+        </h2>
 
         {/* Meta: rating + year + genres */}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-5">

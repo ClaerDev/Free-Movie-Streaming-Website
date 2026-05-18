@@ -50,6 +50,10 @@ export default function HomePage() {
         description="Watch trending movies and TV shows for free. Browse by genre, discover new releases, and stream instantly on WeFlix — powered by TMDB."
         noSuffix
       />
+      
+      {/* ── Visually Hidden H1 for SEO (Brand Keyword 'WeFlix') ── */}
+      <h1 className="sr-only">WeFlix - Free Movie & TV Show Streaming Platform</h1>
+
       <HeroBanner />
 
       <div className="pt-10 pb-8">
