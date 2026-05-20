@@ -136,15 +136,24 @@ export const fetchMovieDetails = async (movieId) => {
     url.searchParams.append('language', 'en-US');
     url.searchParams.append('append_to_response', 'credits');
 
-    const response = await fetch(url);
+    let response = await fetch(url);
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.status_message || `Failed to fetch movie details`);
+      throw new Error(`Failed to fetch movie details`);
     }
 
-    const movieData = await response.json();
-    return movieData;
+    try {
+      const text = await response.text();
+      return JSON.parse(text);
+    } catch (parseError) {
+      // TMDB edge cache can sometimes return corrupted/double-gzipped binary blobs.
+      // Retry with a cache buster to force a fresh JSON response from origin.
+      url.searchParams.set('cb', Date.now());
+      const retryResponse = await fetch(url);
+      if (!retryResponse.ok) throw new Error(`Retry failed`);
+      const retryText = await retryResponse.text();
+      return JSON.parse(retryText);
+    }
   } catch (error) {
     throw new Error(`Movie details fetch failed: ${error.message}`);
   }
@@ -163,14 +172,15 @@ export const fetchRelatedMovies = async (movieId) => {
     const response = await fetch(url);
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.status_message || `Failed to fetch related movies`);
+      console.warn(`Failed to fetch related movies for ${movieId}`);
+      return [];
     }
 
     const relatedData = await response.json();
-    return relatedData.results;
+    return relatedData.results || [];
   } catch (error) {
-    throw new Error(`Related movies fetch failed: ${error.message}`);
+    console.warn(`Related movies fetch failed: ${error.message}`);
+    return [];
   }
 };
 
@@ -186,15 +196,22 @@ export const fetchSeriesDetails = async (tvId) => {
     url.searchParams.append('language', 'en-US');
     url.searchParams.append('append_to_response', 'credits');
 
-    const response = await fetch(url);
+    let response = await fetch(url);
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.status_message || `Failed to fetch TV series details`);
+      throw new Error(`Failed to fetch TV series details`);
     }
 
-    const seriesData = await response.json();
-    return seriesData;
+    try {
+      const text = await response.text();
+      return JSON.parse(text);
+    } catch (parseError) {
+      url.searchParams.set('cb', Date.now());
+      const retryResponse = await fetch(url);
+      if (!retryResponse.ok) throw new Error(`Retry failed`);
+      const retryText = await retryResponse.text();
+      return JSON.parse(retryText);
+    }
   } catch (error) {
     throw new Error(`TV series details fetch failed: ${error.message}`);
   }
@@ -212,23 +229,38 @@ export const fetchAllEpisodes = async (tvId) => {
     const seriesDetails = await fetchSeriesDetails(tvId);
     const { seasons } = seriesDetails;
 
+    if (!seasons) return [];
+
     const seasonDetailsPromises = seasons.map(async (season) => {
-      const url = new URL(`${BASE_URL}/tv/${tvId}/season/${season.season_number}`);
-      url.searchParams.append('api_key', API_KEY);
-      url.searchParams.append('language', 'en-US');
+      try {
+        const url = new URL(`${BASE_URL}/tv/${tvId}/season/${season.season_number}`);
+        url.searchParams.append('api_key', API_KEY);
+        url.searchParams.append('language', 'en-US');
 
-      const response = await fetch(url);
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.status_message || `Failed to fetch season ${season.season_number}`);
+        let response = await fetch(url);
+        if (!response.ok) {
+          console.warn(`Failed to fetch season ${season.season_number} for TV ${tvId}`);
+          return null; // Return null instead of throwing to prevent Promise.all from failing
+        }
+
+        try {
+          const text = await response.text();
+          return JSON.parse(text);
+        } catch (parseError) {
+          url.searchParams.set('cb', Date.now());
+          const retryResponse = await fetch(url);
+          if (!retryResponse.ok) return null;
+          const retryText = await retryResponse.text();
+          return JSON.parse(retryText);
+        }
+      } catch (err) {
+        console.warn(`Error fetching season ${season.season_number} for TV ${tvId}:`, err);
+        return null;
       }
-
-      const seasonData = await response.json();
-      return seasonData;  // Contains all episodes for this season
     });
 
     const allSeasonsDetails = await Promise.all(seasonDetailsPromises);
-    return allSeasonsDetails;
+    return allSeasonsDetails.filter(Boolean); // Filter out any failed seasons
   } catch (error) {
     throw new Error(`All episodes fetch failed: ${error.message}`);
   }
@@ -249,14 +281,15 @@ export const fetchRelatedSeries = async (tvId) => {
     const response = await fetch(url);
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.status_message || `Failed to fetch related TV series`);
+      console.warn(`Failed to fetch related TV series for ${tvId}`);
+      return [];
     }
 
     const relatedSeriesData = await response.json();
-    return relatedSeriesData.results;
+    return relatedSeriesData.results || [];
   } catch (error) {
-    throw new Error(`Related TV series fetch failed: ${error.message}`);
+    console.warn(`Related TV series fetch failed: ${error.message}`);
+    return [];
   }
 };
 

@@ -31,11 +31,13 @@ export function getIdFromDetailSlug(slug = '') {
   if (!slug) return null;
   if (/^\d+$/.test(slug)) return Number(slug);
 
-  const startsWithId = slug.match(/^(\d+)-/);
-  if (startsWithId) return Number(startsWithId[1]);
-
+  // Check canonical format first (e.g., 'fight-club-550')
   const endsWithId = slug.match(/-(\d+)$/);
   if (endsWithId) return Number(endsWithId[1]);
+
+  // Fallback to legacy format (e.g., '550-fight-club')
+  const startsWithId = slug.match(/^(\d+)-/);
+  if (startsWithId) return Number(startsWithId[1]);
 
   return null;
 }
