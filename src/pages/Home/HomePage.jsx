@@ -6,7 +6,6 @@ import TrendingRow from './TrendingRow';
 import ContinueWatchingRow from './ContinueWatchingRow';
 import PersonalizedRow from './PersonalizedRow';
 import SEO from './SEO';
-import AdBanner from '../../components/AdBanner';
 
 const SectionDivider = ({ label }) => (
   <div className="flex items-center gap-4 px-4 sm:px-6 mb-8 mt-4">
@@ -89,11 +88,6 @@ export default function HomePage() {
         />
 
         <SectionDivider label="TV Shows" />
-
-        {/* ── Non-intrusive Ad (between Movies & TV) ── */}
-        <div className="px-4 sm:px-6 mb-6 max-w-7xl mx-auto">
-          <AdBanner />
-        </div>
 
         {/* ── TV ── */}
         <TrendingRow
