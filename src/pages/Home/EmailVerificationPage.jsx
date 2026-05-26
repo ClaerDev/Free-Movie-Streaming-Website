@@ -29,20 +29,27 @@ export default function EmailVerificationPage() {
       try {
         // 1. Actually verify the email token with Firebase
         await applyActionCode(auth, oobCode);
-        
-        // 2. VERY IMPORTANT: Wait for Firebase to finish reading the local browser's session storage.
-        // If they just opened a new tab from Gmail, auth.currentUser might be null for a split second!
+
+        // 2. Wait for Firebase to finish resolving the local session.
         await auth.authStateReady();
-        
-        // 3. If they opened the link in the SAME browser/device they registered with, 
-        // silently refresh their profile and log them in completely.
+
+        // 3. If they opened the link on the SAME device they registered on,
+        //    currentUser will be present — reload it to get the fresh emailVerified: true
+        //    token, then write it to Firestore immediately.
+        //
+        //    If they opened it on a DIFFERENT device (e.g. mobile after registering on Mac),
+        //    currentUser is null here. In that case we skip the Firestore write —
+        //    it will be done by saveUserToFirestore() the next time they log in on any device,
+        //    because signInWithEmailAndPassword always returns a fresh ID token from the server.
         if (auth.currentUser) {
-          auth.currentUser.reload().then(() => {
-            const ref = doc(db, 'users', auth.currentUser.uid);
-            setDoc(ref, { emailVerified: true }, { merge: true }).catch(console.error);
-          }).catch(console.error);
+          await auth.currentUser.reload();
+          const u = auth.currentUser;
+          if (u.emailVerified) {
+            const ref = doc(db, 'users', u.uid);
+            await setDoc(ref, { emailVerified: true }, { merge: true });
+          }
         }
-        
+
         setSuccess(true);
       } catch (err) {
         setError('The verification link is invalid or has expired.');

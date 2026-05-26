@@ -98,7 +98,7 @@ export default function AuthModal({ isOpen, onClose }) {
         // Sign in with email/password
         const result = await signInWithEmailAndPassword(auth, email, password);
 
-        // Enforce email verification
+        await result.user.reload();
         if (!result.user.emailVerified) {
           await auth.signOut();
           setError('Please verify your email address before logging in. Check your inbox or spam folder.');
