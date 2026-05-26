@@ -12,7 +12,6 @@ import SEO from "../SEO";
 import ContentCard from "../ContentCard";
 import CastRow from "../reused/CastRow";
 import AuthModal from "../../../components/AuthModal";
-import AdBanner from "../../../components/AdBanner";
 import { useWatchlist } from "../../../context/WatchlistContext";
 
 const MemoizedVideoPlayer = memo(VideoPlayer);
@@ -362,8 +361,6 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
           </div>
         </div>
 
-        {/* ── Ad Banner (between player and info) ── */}
-        <AdBanner className="mx-2 md:mx-0 mb-6" />
 
         {/* Info Banner */}
         <div className="flex items-start gap-4 bg-blue-900/10 border border-blue-500/20 rounded-2xl p-4 md:p-5 mx-2 md:mx-0">
