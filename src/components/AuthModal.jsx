@@ -385,6 +385,14 @@ export default function AuthModal({ isOpen, onClose }) {
                     </div>
                   )}
 
+                  <div className="flex justify-center">
+                    <div
+                      className="cf-turnstile"
+                      data-sitekey="0x4AAAAAABDXIPkP3kbxBSU8N"
+                      data-theme="dark"
+                    />
+                  </div>
+
                   <button
                     type="submit"
                     disabled={loading}
