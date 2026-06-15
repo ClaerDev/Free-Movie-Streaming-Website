@@ -426,7 +426,6 @@ const MovieDetails = ({ movieId: movieIdProp }) => {
           <div className="flex items-center gap-2">
             <span className="text-white font-black text-base">We<span className="text-red-500">Flix</span></span>
             <span className="mx-2 opacity-50">|</span>
-            <span>Developed by <span className="text-gray-300 font-medium">Phyo Min Thein</span></span>
           </div>
           <div className="flex items-center gap-2">
             <span>© {new Date().getFullYear()} WeFlix</span>

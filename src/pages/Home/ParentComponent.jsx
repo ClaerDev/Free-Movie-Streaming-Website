@@ -151,21 +151,36 @@ function ParentComponent() {
         {/* Footer — home page only */}
         {location.pathname === '/' && <footer className="bg-[#0a0c12]">
           <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-          <div className="max-w-5xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-gray-600">
+          <div className="max-w-5xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-gray-600">
             <div className="flex items-center gap-3">
               <span className="text-white font-black text-sm">We<span className="text-red-500">Flix</span></span>
               <span>·</span>
               <span>Developed by <span className="text-gray-400 font-semibold">Phyo Min Thein</span></span>
             </div>
-            <div className="flex items-center gap-3">
-              <span>© {new Date().getFullYear()} WeFlix</span>
-              <span>·</span>
-              <span>
-                Data by{' '}
-                <a href="https://www.themoviedb.org" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white underline underline-offset-2 transition-colors">
-                  TMDB
-                </a>
-              </span>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
+                <span>© {new Date().getFullYear()} WeFlix</span>
+                <span>·</span>
+                <span>
+                  Data by{' '}
+                  <a href="https://www.themoviedb.org" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white underline underline-offset-2 transition-colors">
+                    TMDB
+                  </a>
+                </span>
+              </div>
+              <a
+                href="//www.dmca.com/Protection/Status.aspx?id=081c0b07-e293-4296-b33d-6cacc0ad79c2"
+                title="DMCA.com Protection Status"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="dmca-badge opacity-70 hover:opacity-100 transition-opacity"
+              >
+                <img
+                  src="//images.dmca.com/Badges/dmca-badge-w150-5x1-01.png?ID=081c0b07-e293-4296-b33d-6cacc0ad79c2"
+                  alt="DMCA.com Protection Status"
+                  style={{ height: '16px', width: 'auto' }}
+                />
+              </a>
             </div>
           </div>
         </footer>}
