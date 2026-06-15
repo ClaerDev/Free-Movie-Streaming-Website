@@ -168,19 +168,7 @@ function ParentComponent() {
                   </a>
                 </span>
               </div>
-              <a
-                href="//www.dmca.com/Protection/Status.aspx?id=081c0b07-e293-4296-b33d-6cacc0ad79c2"
-                title="DMCA.com Protection Status"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="dmca-badge opacity-70 hover:opacity-100 transition-opacity"
-              >
-                <img
-                  src="//images.dmca.com/Badges/dmca-badge-w150-5x1-01.png?ID=081c0b07-e293-4296-b33d-6cacc0ad79c2"
-                  alt="DMCA.com Protection Status"
-                  style={{ height: '16px', width: 'auto' }}
-                />
-              </a>
+              <a href="//www.dmca.com/Protection/Status.aspx?ID=204cd8cc-b62c-4f4a-aa8b-939824095655" title="DMCA.com Protection Status" class="dmca-badge"> <img src ="https://images.dmca.com/Badges/dmca_protected_sml_120m.png?ID=204cd8cc-b62c-4f4a-aa8b-939824095655"  alt="DMCA.com Protection Status" /></a>  <script src="https://images.dmca.com/Badges/DMCABadgeHelper.min.js"> </script>
             </div>
           </div>
         </footer>}
